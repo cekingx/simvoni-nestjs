@@ -19,7 +19,7 @@ import { User } from "./users/user.entity"
       username: 'root',
       password: 'root13',
       database: 'db_simvoni2',
-      entities: [User],
+      autoLoadEntities: true,
       synchronize: true
     })
   ],
