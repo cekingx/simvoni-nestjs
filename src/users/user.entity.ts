@@ -10,16 +10,22 @@ export class User
     @Column()
     name: string;
 
-    @Column()
+    @Column({
+        unique: true
+    })
     username: string;
 
     @Column()
     password: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     walletAddress: string
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     privateKey: string
 
     @ManyToOne(() => UserRole, userRole => userRole.role)

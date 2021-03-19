@@ -5,5 +5,5 @@ export class UserDto {
     password?       : string;
     walletAddress   : string;
     privateKey      : string;
-    role            : string
+    role            : string;
 }

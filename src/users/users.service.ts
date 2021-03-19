@@ -25,8 +25,6 @@ export class UsersService {
 
         user.name           = createUserDto.name;
         user.username       = createUserDto.username;
-        user.walletAddress  = createUserDto.walletAddress;
-        user.privateKey     = createUserDto.privateKey;
         user.userRole       = role;
 
         user.password       = await this.hashPassword(createUserDto.password);
@@ -37,6 +35,15 @@ export class UsersService {
     findAll(): Promise<User[]>
     {
         return this.userRepository.find();
+    }
+
+    findAllElectionAuthority(): Promise<User[]>
+    {
+        return this.userRepository
+            .createQueryBuilder('user')
+            .innerJoinAndSelect('user.userRole', 'user_role')
+            .where("user_role.role = :role", {role: "election_authority"})
+            .getMany();
     }
 
     findOne(username: string): Promise<User>
@@ -53,8 +60,4 @@ export class UsersService {
         const saltOrRound = 10;
         return bcrypt.hash(password, saltOrRound);
     }
-    // async findOne(username: string): Promise<User | undefined>
-    // {
-    //     return this.users.find(user => user.username === username)
-    // }
 }
