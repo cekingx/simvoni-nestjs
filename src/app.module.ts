@@ -4,10 +4,11 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { User } from "./users/user.entity"
 import { EthereumModule } from './ethereum/ethereum.module';
 import { SuperAdminController } from './controller/super-admin/super-admin.controller';
 import { ErrorResponseService } from './helper/error-response/error-response.service';
+import { ElectionAuthorityController } from './controller/election-authority/election-authority.controller';
+import { ElectionsModule } from './elections/elections.module';
 
 @Module({
   imports: [
@@ -23,9 +24,10 @@ import { ErrorResponseService } from './helper/error-response/error-response.ser
       autoLoadEntities: true,
       synchronize: true
     }),
-    EthereumModule
+    EthereumModule,
+    ElectionsModule
   ],
-  controllers: [AppController, SuperAdminController],
+  controllers: [AppController, SuperAdminController, ElectionAuthorityController],
   providers: [AppService, ErrorResponseService],
 })
 export class AppModule {}

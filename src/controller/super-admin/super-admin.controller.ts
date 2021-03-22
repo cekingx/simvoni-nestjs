@@ -8,8 +8,8 @@ import { UsersService } from 'src/users/users.service';
 @Controller('super-admin')
 export class SuperAdminController {
     constructor(
-        private userService: UsersService,
-        private errorResponseService: ErrorResponseService
+        private userService             : UsersService,
+        private errorResponseService    : ErrorResponseService
     ) {}
 
     @Get('election-authority')
