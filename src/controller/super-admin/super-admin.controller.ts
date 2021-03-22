@@ -1,4 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Res } from '@nestjs/common';
+import { ErrorResponseService } from 'src/helper/error-response/error-response.service';
+import { CreateEaDto } from 'src/users/create-ea.dto';
 import { UserDto } from 'src/users/user.dto';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -6,7 +8,8 @@ import { UsersService } from 'src/users/users.service';
 @Controller('super-admin')
 export class SuperAdminController {
     constructor(
-        private userService: UsersService
+        private userService: UsersService,
+        private errorResponseService: ErrorResponseService
     ) {}
 
     @Get('election-authority')
@@ -31,6 +34,23 @@ export class SuperAdminController {
         return {
             message: "Success",
             data: users
+        }
+    }
+
+    @Post('election-authority')
+    async createElectionAuthority(@Body() createEaDto: CreateEaDto, @Res() res)
+    {
+        try {
+            await this.userService.createEa(createEaDto);
+        } catch (error) {
+            res
+                .status(HttpStatus.BAD_REQUEST)
+                .json(this.errorResponseService.errorResponse(error.code))
+            return;
+        }
+
+        return {
+            message: "Success"
         }
     }
 }

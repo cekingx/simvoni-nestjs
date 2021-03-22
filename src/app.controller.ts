@@ -49,6 +49,6 @@ export class AppController {
   @Post('deploy-contract')
   deployContract()
   {
-    return this.electionService.deployContract('0x62700b14ECc5Ff12A411B69Fd604F54A5a7A3e4F');
+    return this.electionService.deployContract('0x3Ee8CAEfebAD5d94688FD43FEf7816Cb3793aF35');
   }
 }

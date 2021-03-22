@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ElectionService } from './election/election.service';
+import { WalletService } from './wallet/wallet.service';
 const web3 = require('web3');
 
 const web3Factory = {
@@ -9,7 +10,7 @@ const web3Factory = {
   }
 }
 @Module({
-  providers: [ElectionService, web3Factory],
-  exports: [ElectionService]
+  providers: [ElectionService, web3Factory, WalletService],
+  exports: [ElectionService, WalletService]
 })
 export class EthereumModule {}

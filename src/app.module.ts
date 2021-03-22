@@ -7,6 +7,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "./users/user.entity"
 import { EthereumModule } from './ethereum/ethereum.module';
 import { SuperAdminController } from './controller/super-admin/super-admin.controller';
+import { ErrorResponseService } from './helper/error-response/error-response.service';
 
 @Module({
   imports: [
@@ -25,6 +26,6 @@ import { SuperAdminController } from './controller/super-admin/super-admin.contr
     EthereumModule
   ],
   controllers: [AppController, SuperAdminController],
-  providers: [AppService],
+  providers: [AppService, ErrorResponseService],
 })
 export class AppModule {}
