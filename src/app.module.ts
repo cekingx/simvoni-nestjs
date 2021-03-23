@@ -14,6 +14,7 @@ import { ElectionsModule } from './elections/elections.module';
   imports: [
     AuthModule, 
     UsersModule,
+    ElectionsModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -24,8 +25,7 @@ import { ElectionsModule } from './elections/elections.module';
       autoLoadEntities: true,
       synchronize: true
     }),
-    EthereumModule,
-    ElectionsModule
+    EthereumModule
   ],
   controllers: [AppController, SuperAdminController, ElectionAuthorityController],
   providers: [AppService, ErrorResponseService],

@@ -6,7 +6,6 @@ import { UserRole } from './user-role.entity';
 import { User } from "./user.entity";
 import * as bcrypt from "bcrypt";
 import { CreateEaDto } from './create-ea.dto';
-import { userInfo } from 'node:os';
 
 @Injectable()
 export class UsersService {

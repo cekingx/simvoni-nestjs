@@ -1,7 +1,8 @@
 import { User } from "src/users/user.entity";
-import { Column, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ElectionStatus } from "./election-status.entity";
 
+@Entity()
 export class Election
 {
     @PrimaryGeneratedColumn()
@@ -22,13 +23,15 @@ export class Election
     @Column({
         type: 'date'
     })
-    start: Date;
+    start: string;
 
     @Column({
         type: 'date'
     })
-    end: Date;
+    end: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     contractAddress: string;
 }
