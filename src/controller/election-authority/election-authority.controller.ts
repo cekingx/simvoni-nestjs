@@ -9,13 +9,14 @@ export class ElectionAuthorityController {
     constructor(
         private electionService: ElectionService,
     )
-    {}
+    { }
 
     @UseGuards(JwtAuthGuard)
     @Post('election')
     async getElectionByUserId(@Body() createElectionDto: CreateElectionDto ,@Request() req)
     {
         let election = await this.electionService.createElection(createElectionDto, req.user.username);
+
         return election;
     }
 }

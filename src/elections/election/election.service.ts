@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { CreateElectionDto } from '../dto/create-election.dto';
 import { Candidate } from '../entity/candidate.entity';
@@ -14,20 +13,25 @@ import { User } from "../../users/user.entity";
 export class ElectionService {
     constructor(
         @InjectRepository(ElectionStatus)
-        private electionStatusRepository: Repository<ElectionStatus>,
+        private electionStatusRepository    : Repository<ElectionStatus>,
+
         @InjectRepository(Election)
-        private electionRepository: Repository<Election>,
+        private electionRepository          : Repository<Election>,
+
         @InjectRepository(Candidate)
-        private candidateRepository: Repository<Candidate>,
+        private candidateRepository         : Repository<Candidate>,
+
         @InjectRepository(Misi)
-        private misiRepository: Repository<Misi>,
+        private misiRepository              : Repository<Misi>,
+
         @InjectRepository(Pengalaman)
-        private pengalamanRepository: Repository<Pengalaman>,
+        private pengalamanRepository        : Repository<Pengalaman>,
+
         @InjectRepository(User)
-        private userRepository: Repository<User>
+        private userRepository              : Repository<User>
     ) { }
 
-    async createElection(createElectionDto: CreateElectionDto, username: string): Promise<Election>
+    async createElection(createElectionDto: CreateElectionDto, election_authority: string): Promise<Election>
     {
         const election  = new Election();
         const status    = await this.electionStatusRepository
@@ -36,7 +40,7 @@ export class ElectionService {
                                 .getOne();
         const ea        = await this.userRepository
                                 .createQueryBuilder('user')
-                                .where('user.username = :username', { username: username })
+                                .where('user.username = :username', { username: election_authority })
                                 .getOne();
 
         election.name               = createElectionDto.name;
