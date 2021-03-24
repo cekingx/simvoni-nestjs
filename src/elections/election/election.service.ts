@@ -31,8 +31,24 @@ export class ElectionService {
         @InjectRepository(User)
         private userRepository              : Repository<User>,
 
-        private connection: Connection
+        private connection                  : Connection
     ) { }
+
+    async getElectionByUsername(username: string): Promise<Election[]>
+    {
+        const ea = await this.userRepository
+                            .createQueryBuilder('user')
+                            .where('user.username = :username', { username: username })
+                            .getOne();
+
+        const elections = await this.electionRepository
+                                .createQueryBuilder('election')
+                                .leftJoinAndSelect('election.electionAuthority', 'election_authority')
+                                .where('election_authority.id = :id', { id: ea.id })
+                                .getMany();
+
+        return elections;
+    }
 
     async createElection(createElectionDto: CreateElectionDto, election_authority: string): Promise<Election>
     {
