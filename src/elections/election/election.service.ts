@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 import { CreateElectionDto } from '../dto/create-election.dto';
 import { Candidate } from '../entity/candidate.entity';
 import { ElectionStatus } from '../entity/election-status.entity';
@@ -8,6 +8,7 @@ import { Election } from '../entity/election.entity';
 import { Misi } from '../entity/misi.entity';
 import { Pengalaman } from '../entity/pengalaman.entity';
 import { User } from "../../users/user.entity";
+import { AddCandidateDto } from '../dto/add-candidate.dto';
 
 @Injectable()
 export class ElectionService {
@@ -28,7 +29,9 @@ export class ElectionService {
         private pengalamanRepository        : Repository<Pengalaman>,
 
         @InjectRepository(User)
-        private userRepository              : Repository<User>
+        private userRepository              : Repository<User>,
+
+        private connection: Connection
     ) { }
 
     async createElection(createElectionDto: CreateElectionDto, election_authority: string): Promise<Election>
@@ -69,13 +72,66 @@ export class ElectionService {
 
         const isEa = ea.userRole.role == 'election_authority' ? true : false;
         const isElectionCreator = election.electionAuthority.id == ea.id ? true : false;
-        console.log(ea);
-        console.log(election);
 
         if(isEa && isElectionCreator) {
             return true;
         }
 
         return false;
+    }
+
+    async addCandidate(addCandidateDto: AddCandidateDto, electionId: number)
+    {
+        let savedCandidate: Candidate;
+        const election = await this.electionRepository
+                                .createQueryBuilder('election')
+                                .where('election.id = :id', { id: electionId })
+                                .getOne();
+
+        let misiArray: Misi[] = [];
+        addCandidateDto.misi.forEach(data => {
+            let misi    = new Misi();
+            misi.misi   = data;
+            misiArray.push(misi);
+        });
+
+        let pengalamanArray: Pengalaman[] = [];
+        addCandidateDto.pengalaman.forEach(data => {
+            let pengalaman          = new Pengalaman();
+            pengalaman.pengalaman   = data;
+            pengalamanArray.push(pengalaman);
+        });
+
+        const queryRunner = this.connection.createQueryRunner();
+
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            const candidate         = new Candidate();
+
+            candidate.name          = addCandidateDto.name;
+            candidate.visi          = addCandidateDto.visi;
+            candidate.election      = election
+
+            savedCandidate          = await queryRunner.manager.save(candidate);
+
+            misiArray.forEach(async misi => {
+                misi.candidate = savedCandidate;
+                await queryRunner.manager.save(misi);
+            });
+
+            pengalamanArray.forEach(async pengalaman => {
+                pengalaman.candidate = savedCandidate;
+                await queryRunner.manager.save(pengalaman);
+            })
+            await queryRunner.commitTransaction();
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+        } finally {
+            await queryRunner.release();
+        }
+
+        return savedCandidate;
     }
 }

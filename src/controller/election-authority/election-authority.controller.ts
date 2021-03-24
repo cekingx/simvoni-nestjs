@@ -31,6 +31,10 @@ export class ElectionAuthorityController {
     {
         let isValidEa = this.electionService.validateEa(req.user.username, electionId);
 
-        return isValidEa;
+        if(isValidEa) {
+            return this.electionService.addCandidate(addCandidateDto, electionId);
+        }
+
+        return false;
     }
 }
