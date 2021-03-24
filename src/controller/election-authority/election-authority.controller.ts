@@ -1,6 +1,7 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { AddCandidateDto } from 'src/elections/dto/add-candidate.dto';
 import { CreateElectionDto } from 'src/elections/dto/create-election.dto';
 import { ElectionService } from 'src/elections/election/election.service';
 
@@ -18,5 +19,18 @@ export class ElectionAuthorityController {
         let election = await this.electionService.createElection(createElectionDto, req.user.username);
 
         return election;
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('add-candidate/:electionId')
+    async addCandidateToElection(
+        @Body() addCandidateDto: AddCandidateDto,
+        @Param('electionId') electionId: number,
+        @Request() req
+    )
+    {
+        let isValidEa = this.electionService.validateEa(req.user.username, electionId);
+
+        return isValidEa;
     }
 }

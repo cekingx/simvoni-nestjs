@@ -52,4 +52,30 @@ export class ElectionService {
 
         return this.electionRepository.save(election);
     }
+
+    async validateEa(username: string, electionId: number): Promise<boolean>
+    {
+        const ea            = await this.userRepository
+                                    .createQueryBuilder('user')
+                                    .innerJoinAndSelect('user.userRole', 'user_role')
+                                    .where('user.username = :username', { username: username })
+                                    .getOne();
+
+        const election      = await this.electionRepository
+                                    .createQueryBuilder('election')
+                                    .innerJoinAndSelect('election.electionAuthority', 'election_authority')
+                                    .where('election.id = :id', { id: electionId })
+                                    .getOne();
+
+        const isEa = ea.userRole.role == 'election_authority' ? true : false;
+        const isElectionCreator = election.electionAuthority.id == ea.id ? true : false;
+        console.log(ea);
+        console.log(election);
+
+        if(isEa && isElectionCreator) {
+            return true;
+        }
+
+        return false;
+    }
 }
