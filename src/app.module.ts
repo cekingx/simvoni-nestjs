@@ -19,9 +19,9 @@ import { ElectionsModule } from './elections/elections.module';
       type: 'mysql',
       host: 'localhost',
       port: 3306,
-      username: 'root',
+      username: 'cekingx',
       password: 'root13',
-      database: 'db_simvoni2',
+      database: 'db_simvoni',
       autoLoadEntities: true,
       synchronize: true
     }),
