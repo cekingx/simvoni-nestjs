@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { ErrorResponseService } from 'src/helper/error-response/error-response.service';
 import { CreateEaDto } from 'src/users/create-ea.dto';
 import { UserDto } from 'src/users/user.dto';
@@ -34,6 +42,36 @@ export class SuperAdminController {
       message: 'Success',
       data: users,
     };
+  }
+
+  @Get('election-authority/:userId')
+  async getElectionAuthorityById(@Param('userId') userId: number, @Res() res) {
+    try {
+      const electionAuthority = await this.userService.findElectionAuthorityById(
+        userId,
+      );
+
+      const user: UserDto = {
+        id: electionAuthority.id,
+        name: electionAuthority.name,
+        username: electionAuthority.username,
+        walletAddress: electionAuthority.walletAddress,
+        privateKey: electionAuthority.privateKey,
+        role: electionAuthority.userRole.role,
+      };
+
+      res.status(HttpStatus.OK).json({
+        message: 'Success',
+        data: user,
+      });
+
+      return;
+    } catch (error) {
+      res
+        .status(HttpStatus.NOT_FOUND)
+        .json(this.errorResponseService.notFound());
+      return;
+    }
   }
 
   @Post('election-authority')

@@ -19,4 +19,11 @@ export class ErrorResponseService {
       }
     }
   }
+
+  notFound() {
+    return {
+      message: 'Not Found',
+      code: 'NOT_FOUND',
+    };
+  }
 }
