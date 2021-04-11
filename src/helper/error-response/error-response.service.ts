@@ -20,6 +20,13 @@ export class ErrorResponseService {
     }
   }
 
+  badRequest() {
+    return {
+      message: 'Bad Request',
+      code: 'BAD_REQUEST',
+    };
+  }
+
   notFound() {
     return {
       message: 'Not Found',

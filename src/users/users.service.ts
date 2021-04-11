@@ -77,6 +77,10 @@ export class UsersService {
       .getOne();
   }
 
+  updateUser(user: User) {
+    return this.userRepository.save(user);
+  }
+
   hashPassword(password: string): Promise<string> {
     const saltOrRound = 10;
     return bcrypt.hash(password, saltOrRound);
