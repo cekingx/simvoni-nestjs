@@ -42,7 +42,8 @@ export class ElectionService {
 
     const elections = await this.electionRepository
       .createQueryBuilder('election')
-      .leftJoinAndSelect('election.electionAuthority', 'election_authority')
+      .innerJoinAndSelect('election.electionAuthority', 'election_authority')
+      .innerJoinAndSelect('election.status', 'election_status')
       .where('election_authority.id = :id', { id: ea.id })
       .getMany();
 

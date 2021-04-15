@@ -10,7 +10,9 @@ import {
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AddCandidateDto } from 'src/elections/dto/add-candidate.dto';
 import { CreateElectionDto } from 'src/elections/dto/create-election.dto';
+import { ElectionDto } from 'src/elections/dto/election.dto';
 import { ElectionService } from 'src/elections/election/election.service';
+import { Election } from 'src/elections/entity/election.entity';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {
@@ -22,8 +24,26 @@ export class ElectionAuthorityController {
     const elections = await this.electionService.getElectionByUsername(
       req.user.username,
     );
+    const electionDtos: ElectionDto[] = [];
 
-    return elections;
+    elections.forEach((election: Election) => {
+      const electionDto: ElectionDto = {
+        id: election.id,
+        name: election.name,
+        description: election.description,
+        start: election.start,
+        end: election.end,
+        status: election.status.status,
+        ea: election.electionAuthority.username,
+      };
+
+      electionDtos.push(electionDto);
+    });
+
+    return {
+      message: 'Success',
+      data: electionDtos,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
