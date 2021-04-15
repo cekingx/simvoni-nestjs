@@ -7,7 +7,6 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AddCandidateDto } from 'src/elections/dto/add-candidate.dto';
 import { CreateElectionDto } from 'src/elections/dto/create-election.dto';

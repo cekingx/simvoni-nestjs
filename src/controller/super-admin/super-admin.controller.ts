@@ -6,7 +6,9 @@ import {
   Param,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { WalletService } from 'src/ethereum/wallet/wallet.service';
 import { ErrorResponseService } from 'src/helper/error-response/error-response.service';
 import { CreateEaDto } from 'src/users/create-ea.dto';
@@ -22,6 +24,7 @@ export class SuperAdminController {
     private walletService: WalletService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get('election-authority')
   async getAllElectionAuthority() {
     const users: UserDto[] = [];
