@@ -50,6 +50,18 @@ export class ElectionService {
     return elections;
   }
 
+  async getCandidatesByElectionId(electionId: number): Promise<Candidate[]> {
+    const candidates = await this.candidateRepository
+      .createQueryBuilder('candidate')
+      .innerJoinAndSelect('candidate.election', 'election')
+      .innerJoinAndSelect('candidate.misi', 'misi')
+      .innerJoinAndSelect('candidate.pengalaman', 'pengalaman')
+      .where('election.id = :id', { id: electionId })
+      .getMany();
+
+    return candidates;
+  }
+
   async createElection(
     createElectionDto: CreateElectionDto,
     election_authority: string,

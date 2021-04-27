@@ -13,6 +13,10 @@ import { CreateElectionDto } from 'src/elections/dto/create-election.dto';
 import { ElectionDto } from 'src/elections/dto/election.dto';
 import { ElectionService } from 'src/elections/election/election.service';
 import { Election } from 'src/elections/entity/election.entity';
+import { CandidateDto } from 'src/elections/dto/candidate.dto';
+import { Candidate } from 'src/elections/entity/candidate.entity';
+import { Misi } from 'src/elections/entity/misi.entity';
+import { Pengalaman } from 'src/elections/entity/pengalaman.entity';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {
@@ -77,5 +81,41 @@ export class ElectionAuthorityController {
     }
 
     return false;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('election/:electionId/candidates')
+  async getCandidatesByElectionId(@Param('electionId') electionId: number) {
+    const candidates = await this.electionService.getCandidatesByElectionId(
+      electionId,
+    );
+    const candidatesDto: CandidateDto[] = [];
+
+    candidates.forEach((candidate: Candidate) => {
+      const misis = [];
+      const pengalamans = [];
+
+      candidate.misi.forEach((misi: Misi) => {
+        misis.push(misi.misi);
+      });
+
+      candidate.pengalaman.forEach((pengalaman: Pengalaman) => {
+        pengalamans.push(pengalaman.pengalaman);
+      });
+
+      const candidateDto: CandidateDto = {
+        id: candidate.id,
+        name: candidate.name,
+        misi: misis,
+        pengalaman: pengalamans,
+      };
+
+      candidatesDto.push(candidateDto);
+    });
+
+    return {
+      message: 'Success',
+      data: candidatesDto,
+    };
   }
 }
