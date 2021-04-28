@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { EthereumModule } from './ethereum/ethereum.module';
 import { SuperAdminController } from './controller/super-admin/super-admin.controller';
 import { ErrorResponseService } from './helper/error-response/error-response.service';
@@ -12,7 +12,7 @@ import { ElectionsModule } from './elections/elections.module';
 
 @Module({
   imports: [
-    AuthModule, 
+    AuthModule,
     UsersModule,
     ElectionsModule,
     TypeOrmModule.forRoot({
@@ -23,11 +23,15 @@ import { ElectionsModule } from './elections/elections.module';
       password: 'root13',
       database: 'db_simvoni',
       autoLoadEntities: true,
-      synchronize: true
+      synchronize: true,
     }),
-    EthereumModule
+    EthereumModule,
   ],
-  controllers: [AppController, SuperAdminController, ElectionAuthorityController],
+  controllers: [
+    AppController,
+    SuperAdminController,
+    ElectionAuthorityController,
+  ],
   providers: [AppService, ErrorResponseService],
 })
 export class AppModule {}

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ElectionService } from './election/election.service';
+import { EthereumElectionService } from './election/ethereum-election.service';
 import { WalletService } from './wallet/wallet.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = require('web3');
@@ -11,7 +11,7 @@ const web3Factory = {
   },
 };
 @Module({
-  providers: [ElectionService, web3Factory, WalletService],
-  exports: [ElectionService, WalletService],
+  providers: [EthereumElectionService, web3Factory, WalletService],
+  exports: [EthereumElectionService, WalletService],
 })
 export class EthereumModule {}

@@ -9,12 +9,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ElectionService } from 'src/elections/election/election.service';
 import { WalletService } from 'src/ethereum/wallet/wallet.service';
 import { ErrorResponseService } from 'src/helper/error-response/error-response.service';
 import { CreateEaDto } from 'src/users/create-ea.dto';
 import { UserDto } from 'src/users/user.dto';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { EthereumElectionService } from 'src/ethereum/election/ethereum-election.service';
 
 @Controller('super-admin')
 export class SuperAdminController {
@@ -22,6 +24,8 @@ export class SuperAdminController {
     private userService: UsersService,
     private errorResponseService: ErrorResponseService,
     private walletService: WalletService,
+    private electionService: ElectionService,
+    private ethereumElectionService: EthereumElectionService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -132,5 +136,45 @@ export class SuperAdminController {
         .json(this.errorResponseService.badRequest());
       return;
     }
+  }
+
+  /**
+   * WIP:
+   * 1. Get super-admin address [v]
+   * 2. Get election-authority address [v]
+   * 3. Send 0.011 eth from super-admin to election-authority [v]
+   * 4. Deploy contract with election-authority address [v]
+   * 5. Save contract address to database [v]
+   * 6. Set candidates to contract
+   *
+   * TODO:
+   * 1. Validation contract address is null
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('deploy-election/:electionId')
+  async deployElection(@Param('electionId') electionId: number) {
+    const election = await this.electionService.getElectionById(electionId);
+    const superAdmin = await this.userService.findOne('super-admin');
+    const ea = await this.userService.findElectionAuthorityById(
+      election.electionAuthority.id,
+    );
+
+    await this.walletService.sendEther(
+      superAdmin.walletAddress,
+      'password',
+      ea.walletAddress,
+      '11000000000000000',
+    );
+
+    const contractAddress = await this.ethereumElectionService.deployContract(
+      ea.walletAddress,
+    );
+
+    election.contractAddress = contractAddress;
+    this.electionService.updateElection(election);
+
+    return {
+      address: contractAddress,
+    };
   }
 }

@@ -3,7 +3,7 @@ import web3 from 'web3';
 import * as contractFile from './BallotContract.json';
 
 @Injectable()
-export class ElectionService {
+export class EthereumElectionService {
   constructor(@Inject('web3') private web3: web3) {}
 
   getAccounts() {
@@ -24,7 +24,7 @@ export class ElectionService {
         })
         .send({
           from: sender,
-          gas: 4712388,
+          gas: 550000,
         });
       console.log(contractInstance);
       console.log(contractInstance.options.address);

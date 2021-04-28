@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ElectionService } from './election.service';
+import { EthereumElectionService } from './ethereum-election.service';
 
 describe('ElectionService', () => {
-  let service: ElectionService;
+  let service: EthereumElectionService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ElectionService],
+      providers: [EthereumElectionService],
     }).compile();
 
-    service = module.get<ElectionService>(ElectionService);
+    service = module.get<EthereumElectionService>(EthereumElectionService);
   });
 
   it('should be defined', () => {
