@@ -64,6 +64,10 @@ export class ElectionAuthorityController {
     return election;
   }
 
+  /**
+   * TODO:
+   * 1. Implement name slug
+   */
   @UseGuards(JwtAuthGuard)
   @Post('add-candidate/:electionId')
   async addCandidateToElection(
