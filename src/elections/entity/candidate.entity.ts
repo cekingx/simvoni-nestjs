@@ -18,6 +18,9 @@ export class Candidate {
   name: string;
 
   @Column()
+  nameSlug: string;
+
+  @Column()
   visi: string;
 
   @ManyToOne(() => Election, (election) => election.name)

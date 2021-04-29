@@ -139,14 +139,6 @@ export class SuperAdminController {
   }
 
   /**
-   * WIP:
-   * 1. Get super-admin address [v]
-   * 2. Get election-authority address [v]
-   * 3. Send 0.011 eth from super-admin to election-authority [v]
-   * 4. Deploy contract with election-authority address [v]
-   * 5. Save contract address to database [v]
-   * 6. Set candidates to contract
-   *
    * TODO:
    * 1. Validation contract address is null
    */
@@ -154,6 +146,9 @@ export class SuperAdminController {
   @Post('deploy-election/:electionId')
   async deployElection(@Param('electionId') electionId: number) {
     const election = await this.electionService.getElectionById(electionId);
+    const candidatesSlug = await this.electionService.getCandidatesSlugByElectionId(
+      electionId,
+    );
     const superAdmin = await this.userService.findOne('super-admin');
     const ea = await this.userService.findElectionAuthorityById(
       election.electionAuthority.id,
@@ -173,8 +168,30 @@ export class SuperAdminController {
     election.contractAddress = contractAddress;
     this.electionService.updateElection(election);
 
+    const contract = this.ethereumElectionService.connectToContract(
+      contractAddress,
+    );
+    candidatesSlug.forEach(async (candidate: any) => {
+      const receipt = await this.ethereumElectionService.registerCandidate(
+        contract,
+        candidate.nameSlug,
+        ea.walletAddress,
+      );
+      console.log(receipt);
+    });
+
     return {
       address: contractAddress,
     };
+  }
+
+  @Get('num-candidates/:address')
+  async getNumCandidates(@Param('address') address: string) {
+    const contract = this.ethereumElectionService.connectToContract(address);
+    const numCandidate = await this.ethereumElectionService.getNumCandidates(
+      contract,
+    );
+
+    return numCandidate;
   }
 }

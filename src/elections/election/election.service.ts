@@ -72,6 +72,19 @@ export class ElectionService {
     return candidates;
   }
 
+  async getCandidatesSlugByElectionId(
+    electionId: number,
+  ): Promise<Candidate[]> {
+    const candidates = await this.candidateRepository
+      .createQueryBuilder('candidate')
+      .innerJoinAndSelect('candidate.election', 'election')
+      .select(['candidate.nameSlug'])
+      .where('election.id = :id', { id: electionId })
+      .getMany();
+
+    return candidates;
+  }
+
   async createElection(
     createElectionDto: CreateElectionDto,
     election_authority: string,
