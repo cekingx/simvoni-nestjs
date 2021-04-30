@@ -50,6 +50,28 @@ export class ElectionService {
     return elections;
   }
 
+  async getReadyToDeployElection(): Promise<Election[]> {
+    const elections = await this.electionRepository
+      .createQueryBuilder('election')
+      .innerJoinAndSelect('election.electionAuthority', 'election_authority')
+      .innerJoinAndSelect('election.status', 'election_status')
+      .where('election_status.id = 2')
+      .getMany();
+
+    return elections;
+  }
+
+  async getDeployedElection(): Promise<Election[]> {
+    const elections = await this.electionRepository
+      .createQueryBuilder('election')
+      .innerJoinAndSelect('election.electionAuthority', 'election_authority')
+      .innerJoinAndSelect('election.status', 'election_status')
+      .where('election_status.id = 3')
+      .getMany();
+
+    return elections;
+  }
+
   async getElectionById(electionId: number): Promise<Election> {
     const election = await this.electionRepository
       .createQueryBuilder('election')
@@ -188,6 +210,21 @@ export class ElectionService {
   }
 
   async updateElection(election: Election) {
+    return this.electionRepository.save(election);
+  }
+
+  async updateElectionAddress(election: Election, address: string) {
+    election.contractAddress = address;
+    return this.electionRepository.save(election);
+  }
+
+  async updateElectionStatus(election: Election, statusId: number) {
+    const status: ElectionStatus = await this.electionStatusRepository
+      .createQueryBuilder('status')
+      .where('id = :id', { id: statusId })
+      .getOne();
+
+    election.status = status;
     return this.electionRepository.save(election);
   }
 }

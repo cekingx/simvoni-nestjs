@@ -17,6 +17,8 @@ import { UserDto } from 'src/users/user.dto';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { EthereumElectionService } from 'src/ethereum/election/ethereum-election.service';
+import { Election } from 'src/elections/entity/election.entity';
+import { ElectionDto } from 'src/elections/dto/election.dto';
 
 @Controller('super-admin')
 export class SuperAdminController {
@@ -120,14 +122,12 @@ export class SuperAdminController {
         await this.userService.updateUser(user);
       }
 
-      setTimeout(() => {
-        res.status(HttpStatus.OK).json({
-          message: 'Success',
-          data: {
-            address,
-          },
-        });
-      }, 5000);
+      res.status(HttpStatus.OK).json({
+        message: 'Success',
+        data: {
+          address,
+        },
+      });
 
       return;
     } catch (error) {
@@ -136,6 +136,31 @@ export class SuperAdminController {
         .json(this.errorResponseService.badRequest());
       return;
     }
+  }
+
+  @Get('election/ready-to-deploy')
+  async getReadyToDeployElection() {
+    const elections: Election[] = await this.electionService.getReadyToDeployElection();
+    const electionDtos: ElectionDto[] = [];
+
+    elections.forEach((election: Election) => {
+      const electionDto: ElectionDto = {
+        id: election.id,
+        name: election.name,
+        description: election.description,
+        start: election.start,
+        end: election.end,
+        status: election.status.status,
+        ea: election.electionAuthority.username,
+      };
+
+      electionDtos.push(electionDto);
+    });
+
+    return {
+      message: 'Success',
+      data: electionDtos,
+    };
   }
 
   /**
@@ -166,7 +191,8 @@ export class SuperAdminController {
     );
 
     election.contractAddress = contractAddress;
-    this.electionService.updateElection(election);
+    await this.electionService.updateElectionAddress(election, contractAddress);
+    await this.electionService.updateElectionStatus(election, 3);
 
     const contract = this.ethereumElectionService.connectToContract(
       contractAddress,
