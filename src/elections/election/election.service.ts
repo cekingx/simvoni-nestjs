@@ -9,6 +9,7 @@ import { Misi } from '../entity/misi.entity';
 import { Pengalaman } from '../entity/pengalaman.entity';
 import { User } from '../../users/user.entity';
 import { AddCandidateDto } from '../dto/add-candidate.dto';
+import { ElectionParticipant } from '../entity/election-participant.entity';
 
 @Injectable()
 export class ElectionService {
@@ -30,6 +31,9 @@ export class ElectionService {
 
     @InjectRepository(User)
     private userRepository: Repository<User>,
+
+    @InjectRepository(ElectionParticipant)
+    private electionParticipantRepository: Repository<ElectionParticipant>,
 
     private connection: Connection,
   ) {}
@@ -226,5 +230,31 @@ export class ElectionService {
 
     election.status = status;
     return this.electionRepository.save(election);
+  }
+
+  async getElectionParticipant(
+    electionId: number,
+  ): Promise<ElectionParticipant[]> {
+    const participant = await this.electionParticipantRepository
+      .createQueryBuilder('participant')
+      .innerJoinAndSelect('participant.participant', 'user')
+      .innerJoinAndSelect('participant.election', 'election')
+      .innerJoinAndSelect('participant.status', 'status')
+      .where('election.id = :id', { id: electionId })
+      .getMany();
+
+    return participant;
+  }
+
+  async getUserParticipation(userId: number): Promise<ElectionParticipant[]> {
+    const participation = await this.electionParticipantRepository
+      .createQueryBuilder('participation')
+      .innerJoinAndSelect('participation.participant', 'user')
+      .innerJoinAndSelect('participation.election', 'election')
+      .innerJoinAndSelect('participation.status', 'status')
+      .where('user.id = :id', { id: userId })
+      .getMany();
+
+    return participation;
   }
 }

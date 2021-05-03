@@ -17,6 +17,11 @@ import { CandidateDto } from 'src/elections/dto/candidate.dto';
 import { Candidate } from 'src/elections/entity/candidate.entity';
 import { Misi } from 'src/elections/entity/misi.entity';
 import { Pengalaman } from 'src/elections/entity/pengalaman.entity';
+import {
+  ElectionParticipantDto,
+  ParticipationDto,
+} from 'src/elections/dto/election-participant.dto';
+import { ElectionParticipant } from 'src/elections/entity/election-participant.entity';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {
@@ -120,6 +125,42 @@ export class ElectionAuthorityController {
     return {
       message: 'Success',
       data: candidatesDto,
+    };
+  }
+
+  @Get('election-participant/:electionId')
+  async getElectionParticipantByElectionId(
+    @Param('electionId') electionId: number,
+  ) {
+    const participants = await this.electionService.getElectionParticipant(
+      electionId,
+    );
+    const election = await this.electionService.getElectionById(electionId);
+
+    const participantsDto: ParticipationDto[] = [];
+
+    participants.forEach((participant: ElectionParticipant) => {
+      const participantDto: ParticipationDto = {
+        participationId: participant.id,
+        userId: participant.participant.id,
+        username: participant.participant.username,
+        electionId: participant.election.id,
+        election: participant.election.name,
+        status: participant.status.status,
+      };
+
+      participantsDto.push(participantDto);
+    });
+
+    const electionParticipantDto: ElectionParticipantDto = {
+      electionId: election.id,
+      electionName: election.name,
+      participant: participantsDto,
+    };
+
+    return {
+      message: 'Success',
+      data: electionParticipantDto,
     };
   }
 }

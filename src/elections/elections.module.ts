@@ -6,7 +6,9 @@ import { ElectionStatus } from './entity/election-status.entity';
 import { Election } from './entity/election.entity';
 import { Misi } from './entity/misi.entity';
 import { Pengalaman } from './entity/pengalaman.entity';
-import { User } from "../users/user.entity";
+import { User } from '../users/user.entity';
+import { ElectionParticipant } from './entity/election-participant.entity';
+import { ParticipationStatus } from './entity/participation-status.entity';
 
 @Module({
   imports: [
@@ -16,10 +18,12 @@ import { User } from "../users/user.entity";
       Misi,
       Pengalaman,
       Election,
-      User
+      User,
+      ElectionParticipant,
+      ParticipationStatus,
     ]),
   ],
   providers: [ElectionService],
-  exports: [ElectionService]
+  exports: [ElectionService],
 })
 export class ElectionsModule {}

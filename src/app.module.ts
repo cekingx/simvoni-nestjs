@@ -9,6 +9,7 @@ import { SuperAdminController } from './controller/super-admin/super-admin.contr
 import { ErrorResponseService } from './helper/error-response/error-response.service';
 import { ElectionAuthorityController } from './controller/election-authority/election-authority.controller';
 import { ElectionsModule } from './elections/elections.module';
+import { VoterController } from './controller/voter/voter.controller';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ElectionsModule } from './elections/elections.module';
     AppController,
     SuperAdminController,
     ElectionAuthorityController,
+    VoterController,
   ],
   providers: [AppService, ErrorResponseService],
 })
