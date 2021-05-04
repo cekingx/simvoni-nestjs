@@ -128,6 +128,7 @@ export class ElectionAuthorityController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('election-participant/:electionId')
   async getElectionParticipantByElectionId(
     @Param('electionId') electionId: number,

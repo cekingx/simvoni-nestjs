@@ -190,6 +190,7 @@ export class ElectionService {
 
       candidate.name = addCandidateDto.name;
       candidate.visi = addCandidateDto.visi;
+      candidate.nameSlug = this.convertToSlug(addCandidateDto.name);
       candidate.election = election;
 
       savedCandidate = await queryRunner.manager.save(candidate);
@@ -256,5 +257,12 @@ export class ElectionService {
       .getMany();
 
     return participation;
+  }
+
+  private convertToSlug(text: string): string {
+    return text
+      .toLowerCase()
+      .replace(/ /g, '-')
+      .replace(/[^\w-]+/g, '');
   }
 }
