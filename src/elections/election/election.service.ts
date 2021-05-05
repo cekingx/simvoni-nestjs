@@ -247,13 +247,13 @@ export class ElectionService {
     return participant;
   }
 
-  async getUserParticipation(userId: number): Promise<ElectionParticipant[]> {
+  async getUserParticipation(username: string): Promise<ElectionParticipant[]> {
     const participation = await this.electionParticipantRepository
       .createQueryBuilder('participation')
       .innerJoinAndSelect('participation.participant', 'user')
       .innerJoinAndSelect('participation.election', 'election')
       .innerJoinAndSelect('participation.status', 'status')
-      .where('user.id = :id', { id: userId })
+      .where('user.username = :user', { user: username })
       .getMany();
 
     return participation;

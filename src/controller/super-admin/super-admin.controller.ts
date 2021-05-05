@@ -8,17 +8,17 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { ElectionService } from 'src/elections/election/election.service';
-import { WalletService } from 'src/ethereum/wallet/wallet.service';
-import { ErrorResponseService } from 'src/helper/error-response/error-response.service';
-import { CreateEaDto } from 'src/users/create-ea.dto';
-import { UserDto } from 'src/users/user.dto';
-import { User } from 'src/users/user.entity';
-import { UsersService } from 'src/users/users.service';
-import { EthereumElectionService } from 'src/ethereum/election/ethereum-election.service';
-import { Election } from 'src/elections/entity/election.entity';
-import { ElectionDto } from 'src/elections/dto/election.dto';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { ElectionService } from '../../elections/election/election.service';
+import { WalletService } from '../../ethereum/wallet/wallet.service';
+import { ErrorResponseService } from '../../helper/error-response/error-response.service';
+import { CreateEaDto } from '../../users/create-ea.dto';
+import { UserDto } from '../../users/user.dto';
+import { User } from '../../users/user.entity';
+import { UsersService } from '../../users/users.service';
+import { EthereumElectionService } from '../../ethereum/election/ethereum-election.service';
+import { Election } from '../../elections/entity/election.entity';
+import { ElectionDto } from '../../elections/dto/election.dto';
 
 @Controller('super-admin')
 export class SuperAdminController {

@@ -7,21 +7,21 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { AddCandidateDto } from 'src/elections/dto/add-candidate.dto';
-import { CreateElectionDto } from 'src/elections/dto/create-election.dto';
-import { ElectionDto } from 'src/elections/dto/election.dto';
-import { ElectionService } from 'src/elections/election/election.service';
-import { Election } from 'src/elections/entity/election.entity';
-import { CandidateDto } from 'src/elections/dto/candidate.dto';
-import { Candidate } from 'src/elections/entity/candidate.entity';
-import { Misi } from 'src/elections/entity/misi.entity';
-import { Pengalaman } from 'src/elections/entity/pengalaman.entity';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { AddCandidateDto } from '../../elections/dto/add-candidate.dto';
+import { CreateElectionDto } from '../../elections/dto/create-election.dto';
+import { ElectionDto } from '../../elections/dto/election.dto';
+import { ElectionService } from '../../elections/election/election.service';
+import { Election } from '../../elections/entity/election.entity';
+import { CandidateDto } from '../../elections/dto/candidate.dto';
+import { Candidate } from '../../elections/entity/candidate.entity';
+import { Misi } from '../../elections/entity/misi.entity';
+import { Pengalaman } from '../../elections/entity/pengalaman.entity';
 import {
   ElectionParticipantDto,
   ParticipationDto,
-} from 'src/elections/dto/election-participant.dto';
-import { ElectionParticipant } from 'src/elections/entity/election-participant.entity';
+} from '../../elections/dto/election-participant.dto';
+import { ElectionParticipant } from '../../elections/entity/election-participant.entity';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {
@@ -69,10 +69,6 @@ export class ElectionAuthorityController {
     return election;
   }
 
-  /**
-   * TODO:
-   * 1. Implement name slug
-   */
   @UseGuards(JwtAuthGuard)
   @Post('add-candidate/:electionId')
   async addCandidateToElection(

@@ -1,4 +1,4 @@
-import { User } from 'src/users/user.entity';
+import { User } from '../../users/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ElectionStatus } from './election-status.entity';
 
