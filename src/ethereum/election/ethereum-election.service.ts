@@ -7,7 +7,10 @@ export class EthereumElectionService {
   private abi: any;
   private bytecode: any;
 
-  constructor(@Inject('web3') private web3: web3) {
+  constructor(
+    @Inject('web3') private web3: web3,
+    @Inject('Contract') private Contract: any,
+  ) {
     this.abi = contractFile.abi;
     this.bytecode = contractFile.bytecode;
   }
@@ -19,17 +22,13 @@ export class EthereumElectionService {
   }
 
   async deployContract(sender: string): Promise<any> {
-    const contract = new this.web3.eth.Contract(this.abi);
-
     try {
-      const contractInstance = await contract
-        .deploy({
-          data: this.bytecode,
-        })
-        .send({
-          from: sender,
-          gas: 550000,
-        });
+      const contractInstance = await this.Contract.deploy({
+        data: this.bytecode,
+      }).send({
+        from: sender,
+        gas: 550000,
+      });
       console.log(contractInstance.options.address);
       return contractInstance.options.address;
     } catch (error) {
@@ -38,7 +37,8 @@ export class EthereumElectionService {
   }
 
   connectToContract(address: string): Promise<any> {
-    const contract: any = new this.web3.eth.Contract(this.abi, address);
+    const contract = this.Contract;
+    contract.options.address = address;
     contract.handleRevert = true;
     return contract;
   }

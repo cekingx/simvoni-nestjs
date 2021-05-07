@@ -1,10 +1,59 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { User } from '../../users/user.entity';
 import { ElectionService } from '../../elections/election/election.service';
 import { EthereumElectionService } from '../../ethereum/election/ethereum-election.service';
 import { WalletService } from '../../ethereum/wallet/wallet.service';
 import { ErrorResponseService } from '../../helper/error-response/error-response.service';
 import { UsersService } from '../../users/users.service';
 import { SuperAdminController } from './super-admin.controller';
+
+const eaArray: User[] = [
+  {
+    id: 1,
+    name: 'satu',
+    username: 'satu',
+    password: 'password',
+    walletAddress: '0x',
+    privateKey: '0x',
+    userRole: {
+      id: 1,
+      role: 'election_authority',
+    },
+  },
+  {
+    id: 2,
+    name: 'dua',
+    username: 'dua',
+    password: 'password',
+    walletAddress: '0x',
+    privateKey: '0x',
+    userRole: {
+      id: 1,
+      role: 'election_authority',
+    },
+  },
+];
+
+const mockUserService = {
+  methods: () => true,
+  findAllElectionAuthority: () => eaArray,
+};
+
+const mockErrorResponseService = {
+  methods: () => true,
+};
+
+const mockWalletService = {
+  methods: () => true,
+};
+
+const mockElectionService = {
+  methods: () => true,
+};
+
+const mockEthereumElectionService = {
+  methods: () => true,
+};
 
 describe('SuperAdminController', () => {
   let controller: SuperAdminController;
@@ -15,33 +64,23 @@ describe('SuperAdminController', () => {
       providers: [
         {
           provide: UsersService,
-          useFactory: () => ({
-            methods: jest.fn(() => true),
-          }),
+          useValue: mockUserService,
         },
         {
           provide: ErrorResponseService,
-          useFactory: () => ({
-            methods: jest.fn(() => true),
-          }),
+          useValue: mockErrorResponseService,
         },
         {
           provide: WalletService,
-          useFactory: () => ({
-            methods: jest.fn(() => true),
-          }),
+          useValue: mockWalletService,
         },
         {
           provide: ElectionService,
-          useFactory: () => ({
-            methods: jest.fn(() => true),
-          }),
+          useValue: mockElectionService,
         },
         {
           provide: EthereumElectionService,
-          useFactory: () => ({
-            methods: jest.fn(() => true),
-          }),
+          useValue: mockEthereumElectionService,
         },
       ],
     }).compile();
@@ -51,5 +90,13 @@ describe('SuperAdminController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('should return all election authority', async () => {
+    const spy = jest.spyOn(mockUserService, 'findAllElectionAuthority');
+    const ea = await controller.getAllElectionAuthority();
+
+    expect(spy).toHaveBeenCalled();
+    expect(ea.data[0]).toEqual(expect.objectContaining({ name: 'satu' }));
   });
 });
