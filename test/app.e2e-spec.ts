@@ -15,10 +15,12 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('/login (POST)', () => {
     return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+      .post('/login')
+      .send({ username: 'super-admin', password: '12345' })
+      .expect(200);
   });
+
+  afterAll(() => app.close());
 });
