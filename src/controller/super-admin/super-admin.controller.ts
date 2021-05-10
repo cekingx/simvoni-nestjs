@@ -55,6 +55,7 @@ export class SuperAdminController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('election-authority/:userId')
   async getElectionAuthorityById(@Param('userId') userId: number, @Res() res) {
     try {
@@ -71,30 +72,36 @@ export class SuperAdminController {
         role: electionAuthority.userRole.role,
       };
 
-      res.status(HttpStatus.OK).json({
+      const response = {
         message: 'Success',
         data: user,
-      });
-
-      return;
+      };
+      return res.status(HttpStatus.OK).json(response);
     } catch (error) {
-      res
+      return res
         .status(HttpStatus.NOT_FOUND)
         .json(this.errorResponseService.notFound());
-      return;
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('election-authority')
   async createElectionAuthority(@Body() createEaDto: CreateEaDto, @Res() res) {
     try {
-      await this.userService.createEa(createEaDto);
+      const ea = await this.userService.createEa(createEaDto);
+      const eaDto: UserDto = {
+        id: ea.id,
+        name: ea.name,
+        username: ea.username,
+        walletAddress: ea.walletAddress,
+        privateKey: ea.privateKey,
+        role: ea.userRole.role,
+      };
 
-      res.status(HttpStatus.OK).json({
+      return res.status(HttpStatus.OK).json({
         message: 'Success',
+        data: eaDto,
       });
-
-      return;
     } catch (error) {
       res
         .status(HttpStatus.BAD_REQUEST)
@@ -103,6 +110,7 @@ export class SuperAdminController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('election-authority/set-wallet-address/:userId')
   async setEaWalletAddress(@Param('userId') userId: number, @Res() res) {
     try {
@@ -111,6 +119,7 @@ export class SuperAdminController {
       );
 
       let address = user.walletAddress;
+      console.log(user);
 
       if (user.walletAddress == null && user.privateKey == null) {
         const data = await this.walletService.createAccount('defaultpass');
@@ -122,14 +131,12 @@ export class SuperAdminController {
         await this.userService.updateUser(user);
       }
 
-      res.status(HttpStatus.OK).json({
+      return res.status(HttpStatus.OK).json({
         message: 'Success',
         data: {
           address,
         },
       });
-
-      return;
     } catch (error) {
       res
         .status(HttpStatus.BAD_REQUEST)
@@ -138,6 +145,7 @@ export class SuperAdminController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('election/ready-to-deploy')
   async getReadyToDeployElection() {
     const elections: Election[] = await this.electionService.getReadyToDeployElection();
@@ -211,6 +219,7 @@ export class SuperAdminController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('num-candidates/:address')
   async getNumCandidates(@Param('address') address: string) {
     const contract = this.ethereumElectionService.connectToContract(address);
