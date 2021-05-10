@@ -66,7 +66,20 @@ export class ElectionAuthorityController {
       req.user.username,
     );
 
-    return election;
+    const electionDto: ElectionDto = {
+      id: election.id,
+      name: election.name,
+      description: election.description,
+      start: election.start,
+      end: election.end,
+      status: election.status.status,
+      ea: election.electionAuthority.username,
+    };
+
+    return {
+      message: 'Success',
+      data: electionDto,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -111,6 +124,7 @@ export class ElectionAuthorityController {
       const candidateDto: CandidateDto = {
         id: candidate.id,
         name: candidate.name,
+        visi: candidate.visi,
         misi: misis,
         pengalaman: pengalamans,
       };
