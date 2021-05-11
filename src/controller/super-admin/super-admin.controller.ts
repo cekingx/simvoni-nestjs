@@ -119,7 +119,6 @@ export class SuperAdminController {
       );
 
       let address = user.walletAddress;
-      console.log(user);
 
       if (user.walletAddress == null && user.privateKey == null) {
         const data = await this.walletService.createAccount('defaultpass');
@@ -215,7 +214,10 @@ export class SuperAdminController {
     });
 
     return {
-      address: contractAddress,
+      message: 'Success',
+      data: {
+        address: contractAddress,
+      },
     };
   }
 
@@ -227,6 +229,9 @@ export class SuperAdminController {
       contract,
     );
 
-    return numCandidate;
+    return {
+      message: 'Success',
+      data: numCandidate,
+    };
   }
 }

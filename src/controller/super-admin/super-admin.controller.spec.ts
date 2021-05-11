@@ -10,6 +10,7 @@ import { UserDto } from 'src/users/user.dto';
 import { CreateEaDto } from 'src/users/create-ea.dto';
 import { Election } from 'src/elections/entity/election.entity';
 import { ElectionDto } from 'src/elections/dto/election.dto';
+import { Candidate } from 'src/elections/entity/candidate.entity';
 
 const mockStatus = {
   id: 1,
@@ -76,29 +77,60 @@ const mockElectionDto: ElectionDto = {
   status: mockElection.status.status,
   ea: mockElection.electionAuthority.username,
 };
+const mockCandidate: Candidate = {
+  id: 1,
+  name: 'name',
+  nameSlug: 'name-slug',
+  visi: 'visi',
+  election: mockElection,
+  misi: [
+    {
+      id: 1,
+      misi: 'misi',
+      candidate: this,
+    },
+  ],
+  pengalaman: [
+    {
+      id: 1,
+      pengalaman: 'pengalaman',
+      candidate: this,
+    },
+  ],
+};
+const mockCandidateSlug = {
+  nameSlug: 'name-slug',
+};
 
 describe('SuperAdminController', () => {
   let controller: SuperAdminController;
   const mockUserService = {
     findAllElectionAuthority: () => [mockUser, mockUser],
     findElectionAuthorityById: () => mockUser,
+    findOne: () => mockUser,
     createEa: () => mockUserNullAddress,
     updateUser: () => mockUser,
   };
   const mockErrorResponseService = {};
   const mockWalletService = {
-    methods: () => true,
     createAccount: () => ({
       address: '0x',
       privateKey: '0x',
     }),
+    sendEther: () => jest.fn(),
   };
   const mockElectionService = {
-    methods: () => true,
     getReadyToDeployElection: () => [mockElection, mockElection],
+    getElectionById: () => mockElection,
+    getCandidatesSlugByElectionId: () => [mockCandidateSlug, mockCandidateSlug],
+    updateElectionAddress: () => jest.fn(),
+    updateElectionStatus: () => jest.fn(),
   };
   const mockEthereumElectionService = {
-    methods: () => true,
+    deployContract: () => '0x',
+    connectToContract: () => jest.fn(),
+    registerCandidate: () => 'receipt',
+    getNumCandidates: () => 1,
   };
 
   beforeEach(async () => {
@@ -211,6 +243,78 @@ describe('SuperAdminController', () => {
     const response = await controller.getReadyToDeployElection();
 
     expect(spy).toHaveBeenCalled();
+    expect(response).toMatchObject(responseMatcher);
+  });
+
+  it('should deploy election', async () => {
+    const responseMatcher = {
+      message: 'Success',
+      data: {
+        address: '0x',
+      },
+    };
+
+    const spyElectionServiceOne = jest.spyOn(
+      mockElectionService,
+      'getElectionById',
+    );
+    const spyElectionServiceTwo = jest.spyOn(
+      mockElectionService,
+      'getCandidatesSlugByElectionId',
+    );
+    const spyElectionServiceThree = jest.spyOn(
+      mockElectionService,
+      'updateElectionAddress',
+    );
+    const spyElectionServiceFour = jest.spyOn(
+      mockElectionService,
+      'updateElectionStatus',
+    );
+    const spyUserServiceOne = jest.spyOn(mockUserService, 'findOne');
+    const spyUserServiceTwo = jest.spyOn(
+      mockUserService,
+      'findElectionAuthorityById',
+    );
+    const spyWalletService = jest.spyOn(mockWalletService, 'sendEther');
+    const spyEthereumServiceOne = jest.spyOn(
+      mockEthereumElectionService,
+      'deployContract',
+    );
+    const spyEthereumServiceTwo = jest.spyOn(
+      mockEthereumElectionService,
+      'connectToContract',
+    );
+    const spyEthereumServiceThree = jest.spyOn(
+      mockEthereumElectionService,
+      'registerCandidate',
+    );
+    const response = await controller.deployElection(1);
+
+    expect(spyElectionServiceOne).toHaveBeenCalled();
+    expect(spyElectionServiceTwo).toHaveBeenCalled();
+    expect(spyElectionServiceThree).toHaveBeenCalled();
+    expect(spyElectionServiceFour).toHaveBeenCalled();
+    expect(spyUserServiceOne).toHaveBeenCalled();
+    expect(spyUserServiceTwo).toHaveBeenCalled();
+    expect(spyWalletService).toHaveBeenCalled();
+    expect(spyEthereumServiceOne).toHaveBeenCalled();
+    expect(spyEthereumServiceTwo).toHaveBeenCalled();
+    expect(spyEthereumServiceThree).toHaveBeenCalled();
+    expect(response).toMatchObject(responseMatcher);
+  });
+
+  it('should return number of candidates', async () => {
+    const responseMatcher = {
+      message: 'Success',
+      data: 1,
+    };
+
+    const spyOne = jest.spyOn(mockEthereumElectionService, 'connectToContract');
+    const spyTwo = jest.spyOn(mockEthereumElectionService, 'getNumCandidates');
+    const response = await controller.getNumCandidates('0x');
+
+    expect(spyOne).toHaveBeenCalled();
+    expect(spyTwo).toHaveBeenCalled();
     expect(response).toMatchObject(responseMatcher);
   });
 });
