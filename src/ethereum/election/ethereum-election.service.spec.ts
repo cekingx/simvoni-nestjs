@@ -7,6 +7,12 @@ const mockContract = {
   options: {
     address: '0x12345',
   },
+  methods: {
+    register_candidate: () => mockContract.methods,
+    send: () => mockContract,
+    get_num_candidates: () => mockContract.methods,
+    call: () => 1,
+  },
   deploy: () => mockContract,
   send: () => mockContract,
 };
@@ -40,11 +46,27 @@ describe('ElectionService', () => {
 
   it('should deploy contract', async () => {
     const address = await service.deployContract('0x');
-    expect(address).toBeTruthy();
+    expect(address).toMatch('0x12345');
   });
 
   it('should connect to contract', async () => {
     const contract = await service.connectToContract('0x');
     expect(contract).toBeTruthy();
+  });
+
+  it('should register candidate', async () => {
+    const receipt = await service.registerCandidate(
+      mockContract,
+      'name',
+      'sender',
+    );
+
+    expect(receipt).toBeTruthy();
+  });
+
+  it('should return number of candidate', async () => {
+    const numCanidates = await service.getNumCandidates(mockContract);
+
+    expect(numCanidates).toEqual(1);
   });
 });

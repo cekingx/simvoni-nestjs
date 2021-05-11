@@ -17,7 +17,6 @@ export class EthereumElectionService {
 
   getAccounts() {
     const data = this.web3.eth.getAccounts();
-    console.log(contractFile);
     return data;
   }
 
