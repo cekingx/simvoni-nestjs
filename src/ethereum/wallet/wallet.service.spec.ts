@@ -4,6 +4,22 @@ import { WalletService } from './wallet.service';
 const web3 = require('web3');
 jest.mock('web3', () => jest.fn());
 web3.mockImplementation(() => jest.fn());
+const mockAccount = {
+  privateKey: '0x',
+  address: '0x',
+};
+const mockWeb3 = {
+  eth: {
+    accounts: {
+      create: () => mockAccount,
+    },
+    personal: {
+      importRawKey: () => jest.fn(),
+      unlockAccount: () => mockAccount,
+      sendTransaction: () => 'receipt',
+    },
+  },
+};
 
 describe('WalletService', () => {
   let service: WalletService;
@@ -14,7 +30,7 @@ describe('WalletService', () => {
         WalletService,
         {
           provide: 'web3',
-          useValue: web3,
+          useValue: mockWeb3,
         },
       ],
     }).compile();
@@ -24,5 +40,28 @@ describe('WalletService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('should create account', async () => {
+    const account = await service.createAccount('password');
+
+    expect(account).toMatchObject(mockAccount);
+  });
+
+  it('should unlock account', async () => {
+    const account = await service.unlockAccount('address', 'password');
+
+    expect(account).toMatchObject(mockAccount);
+  });
+
+  it('should send ether', async () => {
+    const receipt = await service.sendEther(
+      'sender',
+      'password',
+      'receiver',
+      'amount',
+    );
+
+    expect(receipt).toBeTruthy();
   });
 });
