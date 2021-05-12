@@ -185,7 +185,7 @@ describe('ElectionService', () => {
 
   it('should return elections by username', async () => {
     const electionMatcher = [mockElection, mockElection];
-    const election = await service.getElectionByUsername('cekingx');
+    const election = await service.getElectionByUsername('username');
 
     expect(election).toMatchObject(electionMatcher);
   });

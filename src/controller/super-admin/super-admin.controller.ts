@@ -210,7 +210,6 @@ export class SuperAdminController {
         candidate.nameSlug,
         ea.walletAddress,
       );
-      console.log(receipt);
     });
 
     return {

@@ -28,7 +28,6 @@ export class EthereumElectionService {
         from: sender,
         gas: 550000,
       });
-      console.log(contractInstance.options.address);
       return contractInstance.options.address;
     } catch (error) {
       console.log('Contract ' + error);
