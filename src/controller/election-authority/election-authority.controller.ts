@@ -19,13 +19,22 @@ import { Misi } from '../../elections/entity/misi.entity';
 import { Pengalaman } from '../../elections/entity/pengalaman.entity';
 import {
   ElectionParticipantDto,
+  ParticipantDto,
   ParticipationDto,
 } from '../../elections/dto/election-participant.dto';
 import { ElectionParticipant } from '../../elections/entity/election-participant.entity';
+import { WalletService } from '../../ethereum/wallet/wallet.service';
+import { EthereumElectionService } from '../../ethereum/election/ethereum-election.service';
+import { UsersService } from '../../users/users.service';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {
-  constructor(private electionService: ElectionService) {}
+  constructor(
+    private electionService: ElectionService,
+    private ethereumElectionService: EthereumElectionService,
+    private walletService: WalletService,
+    private userService: UsersService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('elections')
@@ -148,15 +157,13 @@ export class ElectionAuthorityController {
     );
     const election = await this.electionService.getElectionById(electionId);
 
-    const participantsDto: ParticipationDto[] = [];
+    const participantsDto: ParticipantDto[] = [];
 
     participants.forEach((participant: ElectionParticipant) => {
-      const participantDto: ParticipationDto = {
+      const participantDto: ParticipantDto = {
         participationId: participant.id,
         userId: participant.participant.id,
         username: participant.participant.username,
-        electionId: participant.election.id,
-        election: participant.election.name,
         status: participant.status.status,
       };
 
@@ -173,5 +180,37 @@ export class ElectionAuthorityController {
       message: 'Success',
       data: electionParticipantDto,
     };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('start-election/:electionId')
+  async startElection(@Param('electionId') electionId: number) {
+    const election = await this.electionService.getElectionById(electionId);
+    const superAdmin = await this.userService.findOne('super-admin');
+    const ea = await this.userService.findElectionAuthorityById(
+      election.electionAuthority.id,
+    );
+    const contractMethods = this.walletService.getContractMethods(
+      election.contractAddress,
+      'START_ELECTION',
+    );
+
+    await this.walletService.sendEtherForMethods(
+      contractMethods,
+      ea.walletAddress,
+      superAdmin.walletAddress,
+      'password',
+    );
+
+    const contract = this.ethereumElectionService.connectToContract(
+      election.contractAddress,
+    );
+
+    const receipt = await this.ethereumElectionService.startElection(
+      contract,
+      ea.walletAddress,
+    );
+
+    return receipt;
   }
 }

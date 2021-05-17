@@ -14,6 +14,7 @@ import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { EthereumElectionService } from './ethereum/election/ethereum-election.service';
+import { WalletService } from './ethereum/wallet/wallet.service';
 import { CreateUserDto } from './users/create-user.dto';
 import { UsersService } from './users/users.service';
 
@@ -24,6 +25,7 @@ export class AppController {
     private authService: AuthService,
     private userService: UsersService,
     private electionService: EthereumElectionService,
+    private walletService: WalletService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -56,9 +58,43 @@ export class AppController {
     return this.electionService.getAccounts();
   }
 
-  @Post('deploy-contract')
-  deployContract()
+  @Post('send-ether')
+  sendEther()
   {
-    return this.electionService.deployContract('0x3Ee8CAEfebAD5d94688FD43FEf7816Cb3793aF35');
+    // begin::register-candidate
+    const contractMethods = this.walletService.getContractMethods(
+      '0x6cd26E299450d6278C808CbA96f8488E840D9685', 
+      'REGISTER_CANDIDATE', 
+      'i-dewa-gede-dirga-yasa'
+    );
+
+    return this.walletService.sendEtherForMethods(
+      contractMethods, 
+      '0x5219eFd1C36fb5cf82b51d953b3CBa5F0a47d234', 
+      '0xA47626D97a4c2829c903514b2aEa3D3648219104', 
+      'password'
+    );
+    // end::register-candidate
+
+    // begin::vote
+    // const contractMethods = this.walletService.getContractMethods(
+    //   '0x6cd26E299450d6278C808CbA96f8488E840D9685', 
+    //   'VOTE', 
+    //   'i-dewa-gede-dirga-yasa'
+    // );
+
+    // return this.walletService.sendEtherForMethods(
+    //   contractMethods, 
+    //   '0x5219eFd1C36fb5cf82b51d953b3CBa5F0a47d234', 
+    //   '0xA47626D97a4c2829c903514b2aEa3D3648219104', 
+    //   'password'
+    // );
+    // end::vote
+
+    // begin::start-election
+    // end::start-election
+
+    // begin::end-election
+    // end::end-election
   }
 }

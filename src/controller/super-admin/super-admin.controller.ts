@@ -186,11 +186,10 @@ export class SuperAdminController {
       election.electionAuthority.id,
     );
 
-    await this.walletService.sendEther(
+    await this.walletService.sendEtherForDeploy(
       superAdmin.walletAddress,
       'password',
       ea.walletAddress,
-      '11000000000000000',
     );
 
     const contractAddress = await this.ethereumElectionService.deployContract(
@@ -205,6 +204,17 @@ export class SuperAdminController {
       contractAddress,
     );
     candidatesSlug.forEach(async (candidate: any) => {
+      const contractMethods = this.walletService.getContractMethods(
+        contractAddress,
+        'REGISTER_CANDIDATE',
+        candidate.nameSlug,
+      );
+      await this.walletService.sendEtherForMethods(
+        contractMethods,
+        ea.walletAddress,
+        superAdmin.walletAddress,
+        'password',
+      );
       const receipt = await this.ethereumElectionService.registerCandidate(
         contract,
         candidate.nameSlug,

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { throwError } from 'rxjs';
 import web3 from 'web3';
 import * as contractFile from './BallotContract.json';
 
@@ -26,7 +27,7 @@ export class EthereumElectionService {
         data: this.bytecode,
       }).send({
         from: sender,
-        gas: 550000,
+        gas: 682278,
       });
       return contractInstance.options.address;
     } catch (error) {
@@ -44,6 +45,22 @@ export class EthereumElectionService {
   async registerCandidate(contract: any, name: string, sender: string) {
     const receipt = await contract.methods
       .register_candidate(name)
+      .send({ from: sender });
+
+    return receipt;
+  }
+
+  async vote(contract: any, name_slug: string, sender: string) {
+    const receipt = await contract.methods
+      .vote(name_slug)
+      .send({ from: sender });
+
+    return receipt;
+  }
+
+  async startElection(contract: any, sender: string) {
+    const receipt = await contract.methods
+      .start_election()
       .send({ from: sender });
 
     return receipt;
