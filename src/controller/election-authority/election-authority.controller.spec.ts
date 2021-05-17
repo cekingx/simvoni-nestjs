@@ -3,6 +3,7 @@ import { CandidateDto } from 'src/elections/dto/candidate.dto';
 import { CreateElectionDto } from 'src/elections/dto/create-election.dto';
 import {
   ElectionParticipantDto,
+  ParticipantDto,
   ParticipationDto,
 } from 'src/elections/dto/election-participant.dto';
 import { ElectionDto } from 'src/elections/dto/election.dto';
@@ -80,12 +81,10 @@ const mockParticipant: ElectionParticipant = {
   status: mockStatus,
 };
 const mockParticipantArray = [mockParticipant, mockParticipant];
-const mockParticipationDto: ParticipationDto = {
+const mockParticipantDto: ParticipantDto = {
   participationId: mockParticipant.id,
   userId: mockUser.id,
   username: mockUser.username,
-  electionId: mockElection.id,
-  election: mockElection.name,
   status: 'status',
 };
 
@@ -175,7 +174,7 @@ describe('ElectionAuthorityController', () => {
     const responseData: ElectionParticipantDto = {
       electionId: mockElection.id,
       electionName: mockElection.name,
-      participant: [mockParticipationDto, mockParticipationDto],
+      participant: [mockParticipantDto, mockParticipantDto],
     };
     const responseMatcher = {
       message: 'Success',
