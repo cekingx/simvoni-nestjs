@@ -66,6 +66,14 @@ export class EthereumElectionService {
     return receipt;
   }
 
+  async endElection(contract: any, sender: string) {
+    const receipt = await contract.methods
+      .end_election()
+      .send({ from: sender });
+
+    return receipt;
+  }
+
   async getNumCandidates(contract: any) {
     const numCanidates = await contract.methods.get_num_candidates().call();
 

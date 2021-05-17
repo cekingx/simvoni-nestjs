@@ -213,4 +213,36 @@ export class ElectionAuthorityController {
 
     return receipt;
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('end-election/:electionId')
+  async endElection(@Param('electionId') electionId: number) {
+    const election = await this.electionService.getElectionById(electionId);
+    const superAdmin = await this.userService.findOne('super-admin');
+    const ea = await this.userService.findElectionAuthorityById(
+      election.electionAuthority.id,
+    );
+    const contractMethods = this.walletService.getContractMethods(
+      election.contractAddress,
+      'END_ELECTION',
+    );
+
+    await this.walletService.sendEtherForMethods(
+      contractMethods,
+      ea.walletAddress,
+      superAdmin.walletAddress,
+      'password',
+    );
+
+    const contract = this.ethereumElectionService.connectToContract(
+      election.contractAddress,
+    );
+
+    const receipt = await this.ethereumElectionService.endElection(
+      contract,
+      ea.walletAddress,
+    );
+
+    return receipt;
+  }
 }
