@@ -20,7 +20,6 @@ import { Pengalaman } from '../../elections/entity/pengalaman.entity';
 import {
   ElectionParticipantDto,
   ParticipantDto,
-  ParticipationDto,
 } from '../../elections/dto/election-participant.dto';
 import { ElectionParticipant } from '../../elections/entity/election-participant.entity';
 import { WalletService } from '../../ethereum/wallet/wallet.service';
@@ -199,7 +198,7 @@ export class ElectionAuthorityController {
       contractMethods,
       ea.walletAddress,
       superAdmin.walletAddress,
-      'password',
+      process.env.ETH_PASSWORD,
     );
 
     const contract = this.ethereumElectionService.connectToContract(
@@ -231,7 +230,7 @@ export class ElectionAuthorityController {
       contractMethods,
       ea.walletAddress,
       superAdmin.walletAddress,
-      'password',
+      process.env.ETH_PASSWORD,
     );
 
     const contract = this.ethereumElectionService.connectToContract(

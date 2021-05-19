@@ -83,7 +83,7 @@ export class VoterController {
         contractMethods,
         voter.walletAddress,
         superAdmin.walletAddress,
-        'password',
+        process.env.ETH_PASSWORD,
       );
 
       const contract = this.ethereumElectionService.connectToContract(

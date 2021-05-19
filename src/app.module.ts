@@ -10,19 +10,23 @@ import { ErrorResponseService } from './helper/error-response/error-response.ser
 import { ElectionAuthorityController } from './controller/election-authority/election-authority.controller';
 import { ElectionsModule } from './elections/elections.module';
 import { VoterController } from './controller/voter/voter.controller';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
     ElectionsModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'cekingx',
-      password: 'root13',
-      database: 'db_simvoni',
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT),
+      username: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
       autoLoadEntities: true,
       synchronize: true,
     }),

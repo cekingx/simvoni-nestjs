@@ -188,7 +188,7 @@ export class SuperAdminController {
 
     await this.walletService.sendEtherForDeploy(
       superAdmin.walletAddress,
-      'password',
+      process.env.ETH_PASSWORD,
       ea.walletAddress,
     );
 
@@ -213,7 +213,7 @@ export class SuperAdminController {
         contractMethods,
         ea.walletAddress,
         superAdmin.walletAddress,
-        'password',
+        process.env.ETH_PASSWORD,
       );
       const receipt = await this.ethereumElectionService.registerCandidate(
         contract,

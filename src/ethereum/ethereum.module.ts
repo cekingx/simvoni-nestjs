@@ -8,14 +8,14 @@ import * as contractFile from './election/BallotContract.json';
 const web3Factory = {
   provide: 'web3',
   useFactory: () => {
-    return new web3('http://127.0.0.1:7545');
+    return new web3(process.env.ETH_ENDPOINT);
   },
 };
 
 const contractFactory = {
   provide: 'Contract',
   useFactory: () => {
-    const web3Contract = new web3('http://127.0.0.1:7545');
+    const web3Contract = new web3(process.env.ETH_ENDPOINT);
     return new web3Contract.eth.Contract(contractFile.abi);
   },
 };
