@@ -64,6 +64,26 @@ export class ElectionAuthorityController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('election/:electionId')
+  async getElectionById(@Param('electionId') electionId: number) {
+    const election = await this.electionService.getElectionById(electionId);
+    const electionDto: ElectionDto = {
+      id: election.id,
+      name: election.name,
+      description: election.description,
+      start: election.start,
+      end: election.end,
+      status: election.status.status,
+      ea: election.electionAuthority.username,
+    };
+
+    return {
+      message: 'Success',
+      data: electionDto,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('election')
   async createElection(
     @Body() createElectionDto: CreateElectionDto,
@@ -210,7 +230,10 @@ export class ElectionAuthorityController {
       ea.walletAddress,
     );
 
-    return receipt;
+    return {
+      message: 'Success',
+      data: receipt,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
