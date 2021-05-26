@@ -202,6 +202,26 @@ export class ElectionAuthorityController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('election-participant/accept/:participationId')
+  async acceptParticipation(@Param('participationId') participationId: number) {
+    const electionParticipation = await this.electionService.getElectionParticipationById(
+      participationId,
+    );
+    this.electionService.acceptParticipation(electionParticipation);
+
+    return {
+      message: 'Success',
+      data: electionParticipation,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('election-participant/reject/:participationId')
+  async rejectParticipation(@Param('participationId') participationId: number) {
+    return 'oke';
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('start-election/:electionId')
   async startElection(@Param('electionId') electionId: number) {
     const election = await this.electionService.getElectionById(electionId);
@@ -229,6 +249,8 @@ export class ElectionAuthorityController {
       contract,
       ea.walletAddress,
     );
+
+    await this.electionService.updateElectionStatus(election, 4);
 
     return {
       message: 'Success',
@@ -265,6 +287,11 @@ export class ElectionAuthorityController {
       ea.walletAddress,
     );
 
-    return receipt;
+    await this.electionService.updateElectionStatus(election, 5);
+
+    return {
+      message: 'Success',
+      data: receipt,
+    };
   }
 }

@@ -10,6 +10,7 @@ import { Pengalaman } from '../entity/pengalaman.entity';
 import { User } from '../../users/user.entity';
 import { AddCandidateDto } from '../dto/add-candidate.dto';
 import { ElectionParticipant } from '../entity/election-participant.entity';
+import { ParticipationStatus } from '../entity/participation-status.entity';
 
 @Injectable()
 export class ElectionService {
@@ -34,6 +35,9 @@ export class ElectionService {
 
     @InjectRepository(ElectionParticipant)
     private electionParticipantRepository: Repository<ElectionParticipant>,
+
+    @InjectRepository(ParticipationStatus)
+    private participationStatusRepository: Repository<ParticipationStatus>,
 
     private connection: Connection,
   ) {}
@@ -259,6 +263,20 @@ export class ElectionService {
     return participant;
   }
 
+  async getElectionParticipationById(
+    participationId: number,
+  ): Promise<ElectionParticipant> {
+    const participation = await this.electionParticipantRepository
+      .createQueryBuilder('participation')
+      .innerJoinAndSelect('participation.participant', 'user')
+      .innerJoinAndSelect('participation.election', 'election')
+      .innerJoinAndSelect('participation.status', 'status')
+      .where('participation.id = :id', { id: participationId })
+      .getOne();
+
+    return participation;
+  }
+
   async getUserParticipation(username: string): Promise<ElectionParticipant[]> {
     const participation = await this.electionParticipantRepository
       .createQueryBuilder('participation')
@@ -269,6 +287,16 @@ export class ElectionService {
       .getMany();
 
     return participation;
+  }
+
+  async acceptParticipation(electionParticipant: ElectionParticipant) {
+    const participationStatus = await this.participationStatusRepository
+      .createQueryBuilder('participation_status')
+      .where('participation_status.id = :id', { id: 2 })
+      .getOne();
+
+    electionParticipant.status = participationStatus;
+    return this.electionParticipantRepository.save(electionParticipant);
   }
 
   private convertToSlug(text: string): string {
