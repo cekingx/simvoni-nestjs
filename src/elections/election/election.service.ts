@@ -299,6 +299,16 @@ export class ElectionService {
     return this.electionParticipantRepository.save(electionParticipant);
   }
 
+  async rejectParticipation(electionParticipant: ElectionParticipant) {
+    const participationStatus = await this.participationStatusRepository
+      .createQueryBuilder('participation_status')
+      .where('participation_status.id = :id', { id: 3 })
+      .getOne();
+
+    electionParticipant.status = participationStatus;
+    return this.electionParticipantRepository.save(electionParticipant);
+  }
+
   private convertToSlug(text: string): string {
     return text
       .toLowerCase()

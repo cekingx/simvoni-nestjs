@@ -218,7 +218,15 @@ export class ElectionAuthorityController {
   @UseGuards(JwtAuthGuard)
   @Post('election-participant/reject/:participationId')
   async rejectParticipation(@Param('participationId') participationId: number) {
-    return 'oke';
+    const electionParticipation = await this.electionService.getElectionParticipationById(
+      participationId,
+    );
+    this.electionService.rejectParticipation(electionParticipation);
+
+    return {
+      message: 'Success',
+      data: electionParticipation,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
