@@ -11,6 +11,7 @@ import { User } from '../../users/user.entity';
 import { AddCandidateDto } from '../dto/add-candidate.dto';
 import { ElectionParticipant } from '../entity/election-participant.entity';
 import { ParticipationStatus } from '../entity/participation-status.entity';
+import { ElectionDto } from '../dto/election.dto';
 
 @Injectable()
 export class ElectionService {
@@ -307,6 +308,34 @@ export class ElectionService {
 
     electionParticipant.status = participationStatus;
     return this.electionParticipantRepository.save(electionParticipant);
+  }
+
+  async getAvailableElection(username: string): Promise<Election[]> {
+    const participation = await this.electionParticipantRepository
+      .createQueryBuilder('participation')
+      .innerJoinAndSelect('participation.participant', 'user')
+      .innerJoinAndSelect('participation.election', 'election')
+      .innerJoinAndSelect('participation.status', 'status')
+      .select(['election.id'])
+      .where('user.username = :user', { user: username })
+      .execute();
+
+    const participatedElectionId = [];
+    participation.map((data: any) => {
+      participatedElectionId.push(data.election_id);
+    });
+
+    const election = await this.electionRepository
+      .createQueryBuilder('election')
+      .innerJoinAndSelect('election.electionAuthority', 'election_authority')
+      .innerJoinAndSelect('election.status', 'election_status')
+      .getMany();
+
+    const availableElection = election.filter((x: any) => {
+      return !participatedElectionId.includes(x.id);
+    });
+
+    return availableElection;
   }
 
   private convertToSlug(text: string): string {

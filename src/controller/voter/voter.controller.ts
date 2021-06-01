@@ -17,6 +17,8 @@ import { ElectionService } from '../../elections/election/election.service';
 import { Ballot } from '../../elections/dto/ballot.dto';
 import { EthereumElectionService } from '../../ethereum/election/ethereum-election.service';
 import { WalletService } from '../../ethereum/wallet/wallet.service';
+import { Election } from 'src/elections/entity/election.entity';
+import { ElectionDto } from 'src/elections/dto/election.dto';
 
 @Controller('voter')
 export class VoterController {
@@ -100,5 +102,33 @@ export class VoterController {
       console.log(error);
       return error;
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('available-election')
+  async getAvailableElection(@Request() req) {
+    const availableElectionDto: ElectionDto[] = [];
+    const username: string = req.user.username;
+    const availableElection: Election[] = await this.electionService.getAvailableElection(
+      username,
+    );
+
+    availableElection.forEach((election: Election) => {
+      const electionDto: ElectionDto = {
+        id: election.id,
+        name: election.name,
+        description: election.description,
+        start: election.start,
+        end: election.end,
+        status: election.status.status,
+        ea: election.electionAuthority.name,
+      };
+      availableElectionDto.push(electionDto);
+    });
+
+    return {
+      message: 'Success',
+      data: availableElectionDto,
+    };
   }
 }
