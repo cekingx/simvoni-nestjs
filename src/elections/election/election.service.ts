@@ -325,17 +325,45 @@ export class ElectionService {
       participatedElectionId.push(data.election_id);
     });
 
-    const election = await this.electionRepository
+    const elections = await this.electionRepository
       .createQueryBuilder('election')
       .innerJoinAndSelect('election.electionAuthority', 'election_authority')
       .innerJoinAndSelect('election.status', 'election_status')
       .getMany();
 
-    const availableElection = election.filter((x: any) => {
-      return !participatedElectionId.includes(x.id);
+    const availableElection = elections.filter((election: Election) => {
+      return !participatedElectionId.includes(election.id);
     });
 
     return availableElection;
+  }
+
+  async getFollowedElection(username: string): Promise<Election[]> {
+    const participation = await this.electionParticipantRepository
+      .createQueryBuilder('participation')
+      .innerJoinAndSelect('participation.participant', 'user')
+      .innerJoinAndSelect('participation.election', 'election')
+      .innerJoinAndSelect('participation.status', 'status')
+      .select(['election.id'])
+      .where('user.username = :user', { user: username })
+      .execute();
+
+    const participatedElectionId = [];
+    participation.map((data: any) => {
+      participatedElectionId.push(data.election_id);
+    });
+
+    const elections = await this.electionRepository
+      .createQueryBuilder('election')
+      .innerJoinAndSelect('election.electionAuthority', 'election_authority')
+      .innerJoinAndSelect('election.status', 'election_status')
+      .getMany();
+
+    const followedElection = elections.filter((election: Election) => {
+      return participatedElectionId.includes(election.id);
+    });
+
+    return followedElection;
   }
 
   private convertToSlug(text: string): string {

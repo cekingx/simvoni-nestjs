@@ -131,4 +131,32 @@ export class VoterController {
       data: availableElectionDto,
     };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('followed-election')
+  async getFollowedElection(@Request() req) {
+    const followedElectionDto: ElectionDto[] = [];
+    const username: string = req.user.username;
+    const followedElection: Election[] = await this.electionService.getFollowedElection(
+      username,
+    );
+
+    followedElection.forEach((election: Election) => {
+      const electionDto: ElectionDto = {
+        id: election.id,
+        name: election.name,
+        description: election.description,
+        start: election.start,
+        end: election.end,
+        status: election.status.status,
+        ea: election.electionAuthority.name,
+      };
+      followedElectionDto.push(electionDto);
+    });
+
+    return {
+      message: 'Success',
+      data: followedElectionDto,
+    };
+  }
 }
