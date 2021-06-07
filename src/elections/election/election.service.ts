@@ -339,18 +339,11 @@ export class ElectionService {
   }
 
   async getFollowedElection(username: string): Promise<Election[]> {
-    const participation = await this.electionParticipantRepository
-      .createQueryBuilder('participation')
-      .innerJoinAndSelect('participation.participant', 'user')
-      .innerJoinAndSelect('participation.election', 'election')
-      .innerJoinAndSelect('participation.status', 'status')
-      .select(['election.id'])
-      .where('user.username = :user', { user: username })
-      .execute();
+    const participation = await this.getUserParticipation(username);
 
     const participatedElectionId = [];
-    participation.map((data: any) => {
-      participatedElectionId.push(data.election_id);
+    participation.map((data: ElectionParticipant) => {
+      participatedElectionId.push(data.election.id);
     });
 
     const elections = await this.electionRepository

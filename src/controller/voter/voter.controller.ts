@@ -19,6 +19,7 @@ import { EthereumElectionService } from '../../ethereum/election/ethereum-electi
 import { WalletService } from '../../ethereum/wallet/wallet.service';
 import { Election } from 'src/elections/entity/election.entity';
 import { ElectionDto } from 'src/elections/dto/election.dto';
+import { FollowedElectionDto } from 'src/elections/dto/followed-election.dto';
 
 @Controller('voter')
 export class VoterController {
@@ -135,20 +136,27 @@ export class VoterController {
   @UseGuards(JwtAuthGuard)
   @Get('followed-election')
   async getFollowedElection(@Request() req) {
-    const followedElectionDto: ElectionDto[] = [];
+    const followedElectionDto: FollowedElectionDto[] = [];
     const username: string = req.user.username;
     const followedElection: Election[] = await this.electionService.getFollowedElection(
       username,
     );
+    const participation: ElectionParticipant[] = await this.electionService.getUserParticipation(
+      username,
+    );
 
     followedElection.forEach((election: Election) => {
-      const electionDto: ElectionDto = {
+      const part1 = participation.find(
+        (data: ElectionParticipant) => data.election.id == election.id,
+      );
+      const electionDto: FollowedElectionDto = {
         id: election.id,
         name: election.name,
         description: election.description,
         start: election.start,
         end: election.end,
         status: election.status.status,
+        participation_status: part1.status.status,
         ea: election.electionAuthority.name,
       };
       followedElectionDto.push(electionDto);
