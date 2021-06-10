@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Request,
   UseGuards,
@@ -141,14 +142,15 @@ export class VoterController {
     const followedElection: Election[] = await this.electionService.getFollowedElection(
       username,
     );
-    const participation: ElectionParticipant[] = await this.electionService.getUserParticipation(
+    const participations: ElectionParticipant[] = await this.electionService.getUserParticipation(
       username,
     );
 
     followedElection.forEach((election: Election) => {
-      const part1 = participation.find(
+      const participation = participations.find(
         (data: ElectionParticipant) => data.election.id == election.id,
       );
+
       const electionDto: FollowedElectionDto = {
         id: election.id,
         name: election.name,
@@ -156,15 +158,43 @@ export class VoterController {
         start: election.start,
         end: election.end,
         status: election.status.status,
-        participation_status: part1.status.status,
+        participation_status: participation.status.status,
         ea: election.electionAuthority.name,
       };
+
       followedElectionDto.push(electionDto);
     });
 
     return {
       message: 'Success',
       data: followedElectionDto,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('join/:electionId')
+  async joinAnElection(@Request() req, @Param('electionId') electionId) {
+    const username: string = req.user.username;
+    const participation: ElectionParticipant = await this.electionService.addElectionParticipation(
+      username,
+      electionId,
+    );
+    const election: Election = await this.electionService.getElectionById(
+      electionId,
+    );
+    const electionDto: ElectionDto = {
+      id: election.id,
+      name: election.name,
+      description: election.description,
+      start: election.start,
+      end: election.end,
+      status: election.status.status,
+      ea: election.electionAuthority.name,
+    };
+
+    return {
+      message: 'Success',
+      data: electionDto,
     };
   }
 }

@@ -1,10 +1,5 @@
-export class FollowedElectionDto {
-  id: number;
-  name: string;
-  description: string;
-  start: string;
-  end: string;
-  status: string;
+import { ElectionDto } from './election.dto';
+
+export class FollowedElectionDto extends ElectionDto {
   participation_status: string;
-  ea: string;
 }

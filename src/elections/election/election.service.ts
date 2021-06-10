@@ -12,6 +12,7 @@ import { AddCandidateDto } from '../dto/add-candidate.dto';
 import { ElectionParticipant } from '../entity/election-participant.entity';
 import { ParticipationStatus } from '../entity/participation-status.entity';
 import { ElectionDto } from '../dto/election.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ElectionService {
@@ -39,6 +40,8 @@ export class ElectionService {
 
     @InjectRepository(ParticipationStatus)
     private participationStatusRepository: Repository<ParticipationStatus>,
+
+    private userService: UsersService,
 
     private connection: Connection,
   ) {}
@@ -311,24 +314,19 @@ export class ElectionService {
   }
 
   async getAvailableElection(username: string): Promise<Election[]> {
-    const participation = await this.electionParticipantRepository
-      .createQueryBuilder('participation')
-      .innerJoinAndSelect('participation.participant', 'user')
-      .innerJoinAndSelect('participation.election', 'election')
-      .innerJoinAndSelect('participation.status', 'status')
-      .select(['election.id'])
-      .where('user.username = :user', { user: username })
-      .execute();
+    const participation = await this.getUserParticipation(username);
 
     const participatedElectionId = [];
-    participation.map((data: any) => {
-      participatedElectionId.push(data.election_id);
+    participation.map((data: ElectionParticipant) => {
+      participatedElectionId.push(data.election.id);
     });
 
     const elections = await this.electionRepository
       .createQueryBuilder('election')
       .innerJoinAndSelect('election.electionAuthority', 'election_authority')
       .innerJoinAndSelect('election.status', 'election_status')
+      .where('election_status.id = 3')
+      .orWhere('election_status.id = 4')
       .getMany();
 
     const availableElection = elections.filter((election: Election) => {
@@ -357,6 +355,22 @@ export class ElectionService {
     });
 
     return followedElection;
+  }
+
+  async addElectionParticipation(username: string, electionId: number) {
+    const participation = new ElectionParticipant();
+    const voter = await this.userService.findOne(username);
+    const election = await this.getElectionById(electionId);
+    const status = await this.participationStatusRepository
+      .createQueryBuilder('status')
+      .where('status.id = 1')
+      .getOne();
+
+    participation.election = election;
+    participation.participant = voter;
+    participation.status = status;
+
+    return this.electionParticipantRepository.save(participation);
   }
 
   private convertToSlug(text: string): string {

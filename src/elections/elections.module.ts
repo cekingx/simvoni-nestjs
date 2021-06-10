@@ -9,6 +9,8 @@ import { Pengalaman } from './entity/pengalaman.entity';
 import { User } from '../users/user.entity';
 import { ElectionParticipant } from './entity/election-participant.entity';
 import { ParticipationStatus } from './entity/participation-status.entity';
+import { UsersService } from 'src/users/users.service';
+import { UserRole } from 'src/users/user-role.entity';
 
 @Module({
   imports: [
@@ -21,9 +23,11 @@ import { ParticipationStatus } from './entity/participation-status.entity';
       User,
       ElectionParticipant,
       ParticipationStatus,
+      User,
+      UserRole,
     ]),
   ],
-  providers: [ElectionService],
+  providers: [ElectionService, UsersService],
   exports: [ElectionService],
 })
 export class ElectionsModule {}
