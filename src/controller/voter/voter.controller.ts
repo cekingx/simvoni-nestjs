@@ -172,6 +172,31 @@ export class VoterController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('ended-election')
+  async getEndedElection(@Request() req) {
+    const endedElection: Election[] = await this.electionService.getEndedElection();
+    const endedElectionDto: ElectionDto[] = [];
+
+    endedElection.forEach((election: Election) => {
+      const electionDto: ElectionDto = {
+        id: election.id,
+        name: election.name,
+        description: election.description,
+        start: election.start,
+        end: election.end,
+        status: election.status.status,
+        ea: election.electionAuthority.name,
+      };
+      endedElectionDto.push(electionDto);
+    });
+
+    return {
+      message: 'Oke',
+      data: endedElectionDto,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('join/:electionId')
   async joinAnElection(@Request() req, @Param('electionId') electionId) {
     const username: string = req.user.username;
