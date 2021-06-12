@@ -21,6 +21,11 @@ import { WalletService } from '../../ethereum/wallet/wallet.service';
 import { Election } from 'src/elections/entity/election.entity';
 import { ElectionDto } from 'src/elections/dto/election.dto';
 import { FollowedElectionDto } from 'src/elections/dto/followed-election.dto';
+import { Candidate } from 'src/elections/entity/candidate.entity';
+import { CandidateDto } from 'src/elections/dto/candidate.dto';
+import { ElectionDetailDto } from 'src/elections/dto/election-detail.dto';
+import { Misi } from 'src/elections/entity/misi.entity';
+import { Pengalaman } from 'src/elections/entity/pengalaman.entity';
 
 @Controller('voter')
 export class VoterController {
@@ -193,6 +198,57 @@ export class VoterController {
     return {
       message: 'Oke',
       data: endedElectionDto,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('election-detail/:electionId')
+  async getElectionDetail(@Param('electionId') electionId) {
+    const election: Election = await this.electionService.getElectionById(
+      electionId,
+    );
+    const candidates: Candidate[] = await this.electionService.getCandidatesByElectionId(
+      electionId,
+    );
+    const candidatesDto: CandidateDto[] = [];
+
+    candidates.forEach((candidate: Candidate) => {
+      const misis: string[] = [];
+      const pengalamans: string[] = [];
+
+      candidate.misi.forEach((misi: Misi) => {
+        misis.push(misi.misi);
+      });
+
+      candidate.pengalaman.forEach((pengalaman: Pengalaman) => {
+        pengalamans.push(pengalaman.pengalaman);
+      });
+
+      const candidateDto: CandidateDto = {
+        id: candidate.id,
+        name: candidate.name,
+        visi: candidate.visi,
+        misi: misis,
+        pengalaman: pengalamans,
+      };
+
+      candidatesDto.push(candidateDto);
+    });
+
+    const electionDto: ElectionDetailDto = {
+      id: election.id,
+      name: election.name,
+      description: election.description,
+      start: election.start,
+      end: election.end,
+      status: election.status.status,
+      ea: election.electionAuthority.name,
+      candidates: candidatesDto,
+    };
+
+    return {
+      message: 'Success',
+      data: electionDto,
     };
   }
 
