@@ -254,6 +254,19 @@ export class ElectionService {
     return this.electionRepository.save(election);
   }
 
+  async updateParticipationStatus(participationId: number, statusId: number) {
+    const participation = await this.getElectionParticipationById(
+      participationId,
+    );
+    const status: ParticipationStatus = await this.participationStatusRepository
+      .createQueryBuilder('status')
+      .where('id = :id', { id: statusId })
+      .getOne();
+
+    participation.status = status;
+    return this.electionParticipantRepository.save(participation);
+  }
+
   async getElectionParticipant(
     electionId: number,
   ): Promise<ElectionParticipant[]> {

@@ -26,6 +26,8 @@ import { CandidateDto } from 'src/elections/dto/candidate.dto';
 import { ElectionDetailDto } from 'src/elections/dto/election-detail.dto';
 import { Misi } from 'src/elections/entity/misi.entity';
 import { Pengalaman } from 'src/elections/entity/pengalaman.entity';
+import { User } from 'src/users/user.entity';
+import { PARTICIPATION_VOTED } from 'src/helper/status';
 
 @Controller('voter')
 export class VoterController {
@@ -76,6 +78,12 @@ export class VoterController {
       const username = req.user.username;
       const voter = await this.userService.findOne(username);
       const superAdmin = await this.userService.findOne('super-admin');
+      const voterParticipations: ElectionParticipant[] = await this.electionService.getUserParticipation(
+        username,
+      );
+      const voterParticipation = voterParticipations.find(
+        (data: ElectionParticipant) => data.election.id == ballot.election_id,
+      );
       const election = await this.electionService.getElectionById(
         ballot.election_id,
       );
@@ -98,13 +106,22 @@ export class VoterController {
       const contract = this.ethereumElectionService.connectToContract(
         election.contractAddress,
       );
+
       const receipt = this.ethereumElectionService.vote(
         contract,
         candidate.nameSlug,
         voter.walletAddress,
       );
 
-      return receipt;
+      await this.electionService.updateParticipationStatus(
+        voterParticipation.id,
+        PARTICIPATION_VOTED,
+      );
+
+      return {
+        message: 'Success',
+        data: receipt,
+      };
     } catch (error) {
       console.log(error);
       return error;
@@ -203,7 +220,11 @@ export class VoterController {
 
   @UseGuards(JwtAuthGuard)
   @Get('election-detail/:electionId')
-  async getElectionDetail(@Param('electionId') electionId) {
+  async getElectionDetail(@Request() req, @Param('electionId') electionId) {
+    const username = req.user.username;
+    const userParticipations: ElectionParticipant[] = await this.electionService.getUserParticipation(
+      username,
+    );
     const election: Election = await this.electionService.getElectionById(
       electionId,
     );
@@ -235,6 +256,10 @@ export class VoterController {
       candidatesDto.push(candidateDto);
     });
 
+    const userParticipation = userParticipations.find(
+      (data: ElectionParticipant) => data.election.id == election.id,
+    );
+
     const electionDto: ElectionDetailDto = {
       id: election.id,
       name: election.name,
@@ -243,6 +268,7 @@ export class VoterController {
       end: election.end,
       status: election.status.status,
       ea: election.electionAuthority.name,
+      participation_status: userParticipation.status.status,
       candidates: candidatesDto,
     };
 
