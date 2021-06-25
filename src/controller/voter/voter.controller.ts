@@ -28,6 +28,10 @@ import { Misi } from 'src/elections/entity/misi.entity';
 import { Pengalaman } from 'src/elections/entity/pengalaman.entity';
 import { User } from 'src/users/user.entity';
 import { PARTICIPATION_VOTED } from 'src/helper/status';
+import {
+  EndedCandidateDto,
+  EndedElectionDto,
+} from 'src/elections/dto/ended-election.dto';
 
 @Controller('voter')
 export class VoterController {
@@ -275,6 +279,76 @@ export class VoterController {
     return {
       message: 'Success',
       data: electionDto,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('ended-election-detail/:electionId')
+  async getEndedElectionDetail(
+    @Request() req,
+    @Param('electionId') electionId,
+  ) {
+    const election: Election = await this.electionService.getElectionById(
+      electionId,
+    );
+    const candidates: Candidate[] = await this.electionService.getCandidatesByElectionId(
+      electionId,
+    );
+    const endedCandidateDto: EndedCandidateDto[] = [];
+    const contract = this.ethereumElectionService.connectToContract(
+      election.contractAddress,
+    );
+
+    for (let index = 0; index < candidates.length; index++) {
+      const candidate = candidates[index];
+
+      const misis: string[] = [];
+      const pengalamans: string[] = [];
+
+      const voteCount: any = await this.ethereumElectionService.getVoteCount(
+        contract,
+        index,
+      );
+
+      candidate.misi.forEach((misi: Misi) => {
+        misis.push(misi.misi);
+      });
+
+      candidate.pengalaman.forEach((pengalaman: Pengalaman) => {
+        pengalamans.push(pengalaman.pengalaman);
+      });
+
+      const candidateDto: EndedCandidateDto = {
+        id: candidate.id,
+        name: candidate.name,
+        visi: candidate.visi,
+        vote_count: +voteCount._votes,
+        misi: misis,
+        pengalaman: pengalamans,
+      };
+
+      endedCandidateDto.push(candidateDto);
+    }
+
+    const winner = endedCandidateDto.reduce((prev, current) => {
+      return prev.vote_count > current.vote_count ? prev : current;
+    });
+
+    const endedElectionDto: EndedElectionDto = {
+      id: election.id,
+      name: election.name,
+      description: election.description,
+      start: election.start,
+      end: election.end,
+      status: election.status.status,
+      ea: election.electionAuthority.name,
+      winner: winner.name,
+      candidates: endedCandidateDto,
+    };
+
+    return {
+      message: 'Success',
+      data: endedElectionDto,
     };
   }
 

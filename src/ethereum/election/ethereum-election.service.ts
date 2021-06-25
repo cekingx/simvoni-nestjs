@@ -79,4 +79,10 @@ export class EthereumElectionService {
 
     return numCanidates;
   }
+
+  async getVoteCount(contract: any, index: number) {
+    const result = await contract.methods.get_candidate(index).call();
+
+    return result;
+  }
 }
