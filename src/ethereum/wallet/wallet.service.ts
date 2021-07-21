@@ -6,7 +6,7 @@ import { EthereumElectionService } from '../election/ethereum-election.service';
 @Injectable()
 export class WalletService {
   constructor(
-    @Inject('web3') private web3: Web3,
+    @Inject('web3') private web3: any,
     private ethereumElectionService: EthereumElectionService,
   ) {}
 
@@ -18,7 +18,7 @@ export class WalletService {
   }
 
   unlockAccount(address: string, password: string): Promise<any> {
-    return this.web3.eth.personal.unlockAccount(address, password, 600);
+    return this.web3.eth.personal.unlockAccount(address, password, null);
   }
 
   sendEther(
@@ -47,17 +47,16 @@ export class WalletService {
   ): Promise<any> {
     const gasPrice = await this.web3.eth.getGasPrice();
     const gasPriceBN = new BigNumber(gasPrice);
-    const gasAmount = 682278;
+    const gasAmount = process.env.ETH_CONTRACT_GAS;
     const gas = gasPriceBN.times(gasAmount).toString();
 
     return this.web3.eth.personal.sendTransaction(
       {
         from: sender,
         gasPrice: gasPrice,
-        gas: '21000',
+        gas: 21000,
         to: receiver,
-        value: gas,
-        data: '',
+        value: this.web3.utils.toHex(gas),
       },
       senderPassword,
     );

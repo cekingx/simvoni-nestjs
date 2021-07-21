@@ -27,7 +27,7 @@ export class EthereumElectionService {
         data: this.bytecode,
       }).send({
         from: sender,
-        gas: 682278,
+        gas: process.env.ETH_CONTRACT_GAS,
       });
       return contractInstance.options.address;
     } catch (error) {
