@@ -186,6 +186,14 @@ export class SuperAdminController {
       election.electionAuthority.id,
     );
 
+    this.walletService.unlockAccount(
+      superAdmin.walletAddress,
+      process.env.ETH_PASSWORD,
+    );
+    this.walletService.unlockAccount(
+      ea.walletAddress,
+      process.env.ETH_PASSWORD,
+    );
     await this.walletService.sendEtherForDeploy(
       superAdmin.walletAddress,
       process.env.ETH_PASSWORD,
@@ -196,31 +204,31 @@ export class SuperAdminController {
       ea.walletAddress,
     );
 
-    election.contractAddress = contractAddress;
-    await this.electionService.updateElectionAddress(election, contractAddress);
-    await this.electionService.updateElectionStatus(election, 3);
+    // election.contractAddress = contractAddress;
+    // await this.electionService.updateElectionAddress(election, contractAddress);
+    // await this.electionService.updateElectionStatus(election, 3);
 
-    const contract = this.ethereumElectionService.connectToContract(
-      contractAddress,
-    );
-    candidatesSlug.forEach(async (candidate: any) => {
-      const contractMethods = this.walletService.getContractMethods(
-        contractAddress,
-        'REGISTER_CANDIDATE',
-        candidate.nameSlug,
-      );
-      await this.walletService.sendEtherForMethods(
-        contractMethods,
-        ea.walletAddress,
-        superAdmin.walletAddress,
-        process.env.ETH_PASSWORD,
-      );
-      const receipt = await this.ethereumElectionService.registerCandidate(
-        contract,
-        candidate.nameSlug,
-        ea.walletAddress,
-      );
-    });
+    // const contract = this.ethereumElectionService.connectToContract(
+    //   contractAddress,
+    // );
+    // candidatesSlug.forEach(async (candidate: any) => {
+    //   const contractMethods = this.walletService.getContractMethods(
+    //     contractAddress,
+    //     'REGISTER_CANDIDATE',
+    //     candidate.nameSlug,
+    //   );
+    //   await this.walletService.sendEtherForMethods(
+    //     contractMethods,
+    //     ea.walletAddress,
+    //     superAdmin.walletAddress,
+    //     process.env.ETH_PASSWORD,
+    //   );
+    //   const receipt = await this.ethereumElectionService.registerCandidate(
+    //     contract,
+    //     candidate.nameSlug,
+    //     ea.walletAddress,
+    //   );
+    // });
 
     return {
       message: 'Success',
