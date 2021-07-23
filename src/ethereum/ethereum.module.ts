@@ -1,6 +1,7 @@
 import { Inject, Module } from '@nestjs/common';
 import { EthereumElectionService } from './election/ethereum-election.service';
 import { WalletService } from './wallet/wallet.service';
+import { AccountService } from './account/account.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = require('web3');
 import * as contractFile from './election/BallotContract.json';
@@ -25,6 +26,7 @@ const contractFactory = {
     web3Factory,
     contractFactory,
     WalletService,
+    AccountService,
   ],
   exports: [EthereumElectionService, WalletService],
 })
