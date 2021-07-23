@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { throwError } from 'rxjs';
 import web3 from 'web3';
+import { AccountService } from '../account/account.service';
 import * as contractFile from './BallotContract.json';
 
 @Injectable()
@@ -11,6 +11,7 @@ export class EthereumElectionService {
   constructor(
     @Inject('web3') private web3: web3,
     @Inject('Contract') private Contract: any,
+    private accountService: AccountService,
   ) {
     this.abi = contractFile.abi;
     this.bytecode = contractFile.bytecode;
@@ -21,7 +22,9 @@ export class EthereumElectionService {
     return data;
   }
 
-  async deployContract(sender: string): Promise<any> {
+  async deployContract(sender: string, senderPassword: string): Promise<any> {
+    this.accountService.unlockAccount(sender, senderPassword);
+
     try {
       const contractInstance = await this.Contract.deploy({
         data: this.bytecode,
@@ -31,23 +34,34 @@ export class EthereumElectionService {
       });
       return contractInstance.options.address;
     } catch (error) {
-      console.log('Contract ' + error);
+      console.log('[DeployContractErr] ' + error);
     }
   }
 
   connectToContract(address: string): Promise<any> {
     const contract = this.Contract;
     contract.options.address = address;
-    contract.handleRevert = true;
     return contract;
   }
 
-  async registerCandidate(contract: any, name: string, sender: string) {
-    const receipt = await contract.methods
-      .register_candidate(name)
-      .send({ from: sender });
+  async registerCandidate(
+    contract: any,
+    name: string,
+    sender: string,
+    senderPassword: string,
+  ) {
+    this.accountService.unlockAccount(sender, senderPassword);
 
-    return receipt;
+    try {
+      const receipt = await contract.methods.register_candidate(name).send({
+        from: sender,
+        gas: '0xDBBA0',
+      });
+
+      return receipt;
+    } catch (error) {
+      console.log('[RegCandidateErr ]' + error);
+    }
   }
 
   async vote(contract: any, name_slug: string, sender: string) {
