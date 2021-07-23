@@ -237,17 +237,18 @@ export class ElectionAuthorityController {
     const ea = await this.userService.findElectionAuthorityById(
       election.electionAuthority.id,
     );
+
     const contractMethods = this.walletService.getContractMethods(
       election.contractAddress,
       'START_ELECTION',
     );
 
-    await this.walletService.sendEtherForMethods(
-      contractMethods,
-      ea.walletAddress,
-      superAdmin.walletAddress,
-      process.env.ETH_PASSWORD,
-    );
+    // await this.walletService.sendEtherForMethods(
+    //   contractMethods,
+    //   ea.walletAddress,
+    //   superAdmin.walletAddress,
+    //   process.env.ETH_PASSWORD,
+    // );
 
     const contract = this.ethereumElectionService.connectToContract(
       election.contractAddress,
