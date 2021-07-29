@@ -28,10 +28,23 @@ export class EthereumElectionService {
     try {
       const contractInstance = await this.Contract.deploy({
         data: this.bytecode,
-      }).send({
-        from: sender,
-        gas: process.env.ETH_CONTRACT_GAS,
-      });
+      })
+        .send({
+          from: sender,
+          gas: process.env.ETH_CONTRACT_GAS,
+        })
+        .on('error', function (error) {
+          console.log('[deployErr] ' + error);
+        })
+        .on('transactionHash', function (transactionHash) {
+          console.log('[trxHash] ' + transactionHash);
+        })
+        .on('receipt', function (receipt) {
+          console.log('[contractAddress] ' + receipt.contractAddress); // contains the new contract address
+        })
+        .on('confirmation', function (confirmationNumber, receipt) {
+          console.log('[confirmation] ' + confirmationNumber, receipt);
+        });
       return contractInstance.options.address;
     } catch (error) {
       console.log('[DeployContractErr] ' + error);
@@ -53,10 +66,24 @@ export class EthereumElectionService {
     this.accountService.unlockAccount(sender, senderPassword);
 
     try {
-      const receipt = await contract.methods.register_candidate(name).send({
-        from: sender,
-        gas: '0xDBBA0',
-      });
+      const receipt = await contract.methods
+        .register_candidate(name)
+        .send({
+          from: sender,
+          gas: '0xDBBA0',
+        })
+        .on('error', function (error) {
+          console.log('[RegisterErr] ' + error);
+        })
+        .on('transactionHash', function (transactionHash) {
+          console.log('[registerTrxHash] ' + transactionHash);
+        })
+        .on('receipt', function (receipt) {
+          console.log('[registerReceipt] ' + receipt); // contains the new contract address
+        })
+        .on('confirmation', function (confirmationNumber, receipt) {
+          console.log('[registerConfirmation] ' + confirmationNumber, receipt);
+        });
 
       return receipt;
     } catch (error) {
@@ -64,28 +91,51 @@ export class EthereumElectionService {
     }
   }
 
-  async vote(contract: any, name_slug: string, sender: string) {
-    const receipt = await contract.methods
-      .vote(name_slug)
-      .send({ from: sender });
+  async vote(
+    contract: any,
+    name_slug: string,
+    sender: string,
+    senderPassword: string,
+  ) {
+    this.accountService.unlockAccount(sender, senderPassword);
 
-    return receipt;
+    try {
+      const receipt = await contract.methods
+        .vote(name_slug)
+        .send({ from: sender, gas: '0xdbba0' });
+
+      return receipt;
+    } catch (error) {
+      console.log('[VoteErr ]' + error);
+    }
   }
 
-  async startElection(contract: any, sender: string) {
-    const receipt = await contract.methods
-      .start_election()
-      .send({ from: sender });
+  async startElection(contract: any, sender: string, senderPassword: string) {
+    this.accountService.unlockAccount(sender, senderPassword);
 
-    return receipt;
+    try {
+      const receipt = await contract.methods
+        .start_election()
+        .send({ from: sender, gas: '0xdbba0' });
+
+      return receipt;
+    } catch (error) {
+      console.log('[StartElecErr] ' + error);
+    }
   }
 
-  async endElection(contract: any, sender: string) {
-    const receipt = await contract.methods
-      .end_election()
-      .send({ from: sender });
+  async endElection(contract: any, sender: string, senderPassword: string) {
+    this.accountService.unlockAccount(sender, senderPassword);
 
-    return receipt;
+    try {
+      const receipt = await contract.methods
+        .end_election()
+        .send({ from: sender, gas: '0xdbba0' });
+
+      return receipt;
+    } catch (error) {
+      console.log('[EndElecErr] ' + error);
+    }
   }
 
   async getNumCandidates(contract: any) {
