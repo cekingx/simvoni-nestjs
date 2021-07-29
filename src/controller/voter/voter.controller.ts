@@ -100,12 +100,15 @@ export class VoterController {
         candidate.nameSlug,
       );
 
-      await this.walletService.sendEtherForMethods(
-        contractMethods,
-        voter.walletAddress,
-        superAdmin.walletAddress,
-        process.env.ETH_PASSWORD,
-      );
+      /**
+       * delete soon
+       */
+      // await this.walletService.sendEtherForMethods(
+      //   contractMethods,
+      //   voter.walletAddress,
+      //   superAdmin.walletAddress,
+      //   process.env.ETH_PASSWORD,
+      // );
 
       const contract = this.ethereumElectionService.connectToContract(
         election.contractAddress,
@@ -115,6 +118,7 @@ export class VoterController {
         contract,
         candidate.nameSlug,
         voter.walletAddress,
+        process.env.ETH_PASSWORD,
       );
 
       await this.electionService.updateParticipationStatus(

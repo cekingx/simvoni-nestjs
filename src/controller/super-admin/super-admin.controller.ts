@@ -186,11 +186,14 @@ export class SuperAdminController {
       election.electionAuthority.id,
     );
 
-    await this.walletService.sendEtherForDeploy(
-      superAdmin.walletAddress,
-      process.env.ETH_PASSWORD,
-      ea.walletAddress,
-    );
+    /**
+     * delete soon
+     */
+    // await this.walletService.sendEtherForDeploy(
+    //   superAdmin.walletAddress,
+    //   process.env.ETH_PASSWORD,
+    //   ea.walletAddress,
+    // );
 
     const contractAddress = await this.ethereumElectionService.deployContract(
       ea.walletAddress,
@@ -213,12 +216,16 @@ export class SuperAdminController {
         'REGISTER_CANDIDATE',
         candidate.nameSlug,
       );
-      await this.walletService.sendEtherForMethods(
-        contractMethods,
-        ea.walletAddress,
-        superAdmin.walletAddress,
-        process.env.ETH_PASSWORD,
-      );
+
+      /**
+       * delete soon
+       */
+      // await this.walletService.sendEtherForMethods(
+      //   contractMethods,
+      //   ea.walletAddress,
+      //   superAdmin.walletAddress,
+      //   process.env.ETH_PASSWORD,
+      // );
       const receipt = await this.ethereumElectionService.registerCandidate(
         contract,
         candidate.nameSlug,

@@ -243,6 +243,9 @@ export class ElectionAuthorityController {
       'START_ELECTION',
     );
 
+    /**
+     * delete soon
+     */
     // await this.walletService.sendEtherForMethods(
     //   contractMethods,
     //   ea.walletAddress,
@@ -257,6 +260,7 @@ export class ElectionAuthorityController {
     const receipt = await this.ethereumElectionService.startElection(
       contract,
       ea.walletAddress,
+      process.env.ETH_PASSWORD,
     );
 
     await this.electionService.updateElectionStatus(election, 4);
@@ -280,12 +284,15 @@ export class ElectionAuthorityController {
       'END_ELECTION',
     );
 
-    await this.walletService.sendEtherForMethods(
-      contractMethods,
-      ea.walletAddress,
-      superAdmin.walletAddress,
-      process.env.ETH_PASSWORD,
-    );
+    /**
+     * delete soon
+     */
+    // await this.walletService.sendEtherForMethods(
+    //   contractMethods,
+    //   ea.walletAddress,
+    //   superAdmin.walletAddress,
+    //   process.env.ETH_PASSWORD,
+    // );
 
     const contract = this.ethereumElectionService.connectToContract(
       election.contractAddress,
@@ -294,6 +301,7 @@ export class ElectionAuthorityController {
     const receipt = await this.ethereumElectionService.endElection(
       contract,
       ea.walletAddress,
+      process.env.ETH_PASSWORD,
     );
 
     await this.electionService.updateElectionStatus(election, 5);
