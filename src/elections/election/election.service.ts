@@ -139,7 +139,7 @@ export class ElectionService {
     const election = new Election();
     const status = await this.electionStatusRepository
       .createQueryBuilder('election_status')
-      .where("election_status.status = 'waiting_approval'")
+      .where("election_status.status = 'draft'")
       .getOne();
     const ea = await this.userRepository
       .createQueryBuilder('user')
