@@ -102,7 +102,19 @@ export class EthereumElectionService {
     try {
       const receipt = await contract.methods
         .vote(name_slug)
-        .send({ from: sender, gas: '0xdbba0' });
+        .send({ from: sender, gas: '0xdbba0' })
+        .on('error', function (error) {
+          console.log('[StartErr] ' + error);
+        })
+        .on('transactionHash', function (transactionHash) {
+          console.log('[startTrxHash] ' + transactionHash);
+        })
+        .on('receipt', function (receipt) {
+          console.log('[startReceipt] ' + receipt); // contains the new contract address
+        })
+        .on('confirmation', function (confirmationNumber, receipt) {
+          console.log('[startConfirmation] ' + confirmationNumber, receipt);
+        });
 
       return receipt;
     } catch (error) {
@@ -116,7 +128,19 @@ export class EthereumElectionService {
     try {
       const receipt = await contract.methods
         .start_election()
-        .send({ from: sender, gas: '0xdbba0' });
+        .send({ from: sender, gas: '0xdbba0' })
+        .on('error', function (error) {
+          console.log('[StartErr] ' + error);
+        })
+        .on('transactionHash', function (transactionHash) {
+          console.log('[startTrxHash] ' + transactionHash);
+        })
+        .on('receipt', function (receipt) {
+          console.log('[startReceipt] ' + receipt); // contains the new contract address
+        })
+        .on('confirmation', function (confirmationNumber, receipt) {
+          console.log('[startConfirmation] ' + confirmationNumber, receipt);
+        });
 
       return receipt;
     } catch (error) {
