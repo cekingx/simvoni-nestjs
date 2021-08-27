@@ -25,6 +25,7 @@ import { ElectionParticipant } from '../../elections/entity/election-participant
 import { WalletService } from '../../ethereum/wallet/wallet.service';
 import { EthereumElectionService } from '../../ethereum/election/ethereum-election.service';
 import { UsersService } from '../../users/users.service';
+import { ElectionDetailDto } from 'src/elections/dto/election-detail.dto';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {
@@ -67,7 +68,34 @@ export class ElectionAuthorityController {
   @Get('election/:electionId')
   async getElectionById(@Param('electionId') electionId: number) {
     const election = await this.electionService.getElectionById(electionId);
-    const electionDto: ElectionDto = {
+    const candidates = await this.electionService.getCandidatesByElectionId(
+      electionId,
+    );
+    const candidatesDto: CandidateDto[] = [];
+
+    candidates.forEach((candidate: Candidate) => {
+      const misis = [];
+      const pengalamans = [];
+
+      candidate.misi.forEach((misi: Misi) => {
+        misis.push(misi.misi);
+      });
+
+      candidate.pengalaman.forEach((pengalaman: Pengalaman) => {
+        pengalamans.push(pengalaman.pengalaman);
+      });
+
+      const candidateDto: CandidateDto = {
+        id: candidate.id,
+        name: candidate.name,
+        visi: candidate.visi,
+        misi: misis,
+        pengalaman: pengalamans,
+      };
+
+      candidatesDto.push(candidateDto);
+    });
+    const electionDto: ElectionDetailDto = {
       id: election.id,
       name: election.name,
       description: election.description,
@@ -75,6 +103,7 @@ export class ElectionAuthorityController {
       end: election.end,
       status: election.status.status,
       ea: election.electionAuthority.username,
+      candidates: candidatesDto,
     };
 
     return {
