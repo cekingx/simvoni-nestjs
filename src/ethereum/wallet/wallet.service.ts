@@ -1,5 +1,7 @@
+import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
+import { Observable } from 'rxjs';
 import Web3 from 'web3';
 import { AccountService } from '../account/account.service';
 import { EthereumElectionService } from '../election/ethereum-election.service';
@@ -10,13 +12,16 @@ export class WalletService {
     @Inject('web3') private web3: any,
     private ethereumElectionService: EthereumElectionService,
     private accountService: AccountService,
+    private http: HttpService,
   ) {}
 
-  async createAccount(password: string): Promise<any> {
-    const account = this.web3.eth.accounts.create();
-
-    await this.web3.eth.personal.importRawKey(account.privateKey, password);
-    return account;
+  createAccount(password: string): Observable<any> {
+    return this.http.post(process.env.ETH_ENDPOINT, {
+      jsonrpc: '2.0',
+      method: 'parity_newAccountFromPhrase',
+      params: [password, password],
+      id: 0,
+    });
   }
 
   async sendEther(

@@ -5,6 +5,7 @@ import { AccountService } from './account/account.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = require('web3');
 import * as contractFile from './election/BallotContract.json';
+import { HttpModule } from '@nestjs/axios';
 
 const web3Factory = {
   provide: 'web3',
@@ -21,6 +22,7 @@ const contractFactory = {
   },
 };
 @Module({
+  imports: [HttpModule],
   providers: [
     EthereumElectionService,
     web3Factory,

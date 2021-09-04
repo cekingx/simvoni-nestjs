@@ -118,25 +118,25 @@ export class SuperAdminController {
         userId,
       );
 
-      let address = user.walletAddress;
+      const address = user.walletAddress;
 
       if (user.walletAddress == null && user.privateKey == null) {
-        const data = await this.walletService.createAccount('defaultpass');
+        this.walletService
+          .createAccount('defaultpass')
+          .subscribe((response: any) => {
+            user.walletAddress = response.data.result;
+            this.userService.updateUser(user);
 
-        user.walletAddress = data.address;
-        user.privateKey = data.privateKey;
-
-        address = data.address;
-        await this.userService.updateUser(user);
+            return res.status(HttpStatus.OK).json({
+              message: 'Success',
+              data: {
+                address: response.data.result,
+              },
+            });
+          });
       }
-
-      return res.status(HttpStatus.OK).json({
-        message: 'Success',
-        data: {
-          address,
-        },
-      });
     } catch (error) {
+      console.log(error);
       res
         .status(HttpStatus.BAD_REQUEST)
         .json(this.errorResponseService.badRequest());
