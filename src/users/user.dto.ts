@@ -4,6 +4,6 @@ export class UserDto {
   username: string;
   password?: string;
   walletAddress: string;
-  privateKey: string;
+  randomSeed: string;
   role: string;
 }

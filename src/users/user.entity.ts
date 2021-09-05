@@ -25,7 +25,7 @@ export class User {
   @Column({
     nullable: true,
   })
-  privateKey: string;
+  randomSeed: string;
 
   @ManyToOne(() => UserRole, (userRole) => userRole.role)
   userRole: UserRole;

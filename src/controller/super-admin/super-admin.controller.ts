@@ -19,6 +19,7 @@ import { UsersService } from '../../users/users.service';
 import { EthereumElectionService } from '../../ethereum/election/ethereum-election.service';
 import { Election } from '../../elections/entity/election.entity';
 import { ElectionDto } from '../../elections/dto/election.dto';
+import { randomString } from 'src/helper/randstr';
 
 @Controller('super-admin')
 export class SuperAdminController {
@@ -42,7 +43,7 @@ export class SuperAdminController {
         name: user.name,
         username: user.username,
         walletAddress: user.walletAddress,
-        privateKey: user.privateKey,
+        randomSeed: user.randomSeed,
         role: user.userRole.role,
       };
 
@@ -68,7 +69,7 @@ export class SuperAdminController {
         name: electionAuthority.name,
         username: electionAuthority.username,
         walletAddress: electionAuthority.walletAddress,
-        privateKey: electionAuthority.privateKey,
+        randomSeed: electionAuthority.randomSeed,
         role: electionAuthority.userRole.role,
       };
 
@@ -94,7 +95,7 @@ export class SuperAdminController {
         name: ea.name,
         username: ea.username,
         walletAddress: ea.walletAddress,
-        privateKey: ea.privateKey,
+        randomSeed: ea.randomSeed,
         role: ea.userRole.role,
       };
 
@@ -118,22 +119,20 @@ export class SuperAdminController {
         userId,
       );
 
-      const address = user.walletAddress;
+      if (user.walletAddress == null && user.randomSeed == null) {
+        const seed = randomString(10);
+        this.walletService.createAccount(seed).subscribe((response: any) => {
+          user.walletAddress = response.data.result;
+          user.randomSeed = seed;
+          this.userService.updateUser(user);
 
-      if (user.walletAddress == null && user.privateKey == null) {
-        this.walletService
-          .createAccount('defaultpass')
-          .subscribe((response: any) => {
-            user.walletAddress = response.data.result;
-            this.userService.updateUser(user);
-
-            return res.status(HttpStatus.OK).json({
-              message: 'Success',
-              data: {
-                address: response.data.result,
-              },
-            });
+          return res.status(HttpStatus.OK).json({
+            message: 'Success',
+            data: {
+              address: response.data.result,
+            },
           });
+        });
       }
     } catch (error) {
       console.log(error);
