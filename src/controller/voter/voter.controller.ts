@@ -27,11 +27,11 @@ import { ElectionDetailDto } from 'src/elections/dto/election-detail.dto';
 import { Misi } from 'src/elections/entity/misi.entity';
 import { Pengalaman } from 'src/elections/entity/pengalaman.entity';
 import { User } from 'src/users/user.entity';
-import { PARTICIPATION_VOTED } from 'src/helper/status';
 import {
   EndedCandidateDto,
   EndedElectionDto,
 } from 'src/elections/dto/ended-election.dto';
+import { ParticipationEnum } from 'src/helper/status';
 
 @Controller('voter')
 export class VoterController {
@@ -123,7 +123,7 @@ export class VoterController {
 
       await this.electionService.updateParticipationStatus(
         voterParticipation.id,
-        PARTICIPATION_VOTED,
+        ParticipationEnum.voted,
       );
 
       return {

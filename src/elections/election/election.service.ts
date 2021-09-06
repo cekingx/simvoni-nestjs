@@ -13,7 +13,7 @@ import { ElectionParticipant } from '../entity/election-participant.entity';
 import { ParticipationStatus } from '../entity/participation-status.entity';
 import { ElectionDto } from '../dto/election.dto';
 import { UsersService } from 'src/users/users.service';
-import { ELECTION_ENDED } from 'src/helper/status';
+import { ElectionStatusEnum } from 'src/helper/status';
 
 @Injectable()
 export class ElectionService {
@@ -376,7 +376,7 @@ export class ElectionService {
       .createQueryBuilder('election')
       .innerJoinAndSelect('election.electionAuthority', 'election_authority')
       .innerJoinAndSelect('election.status', 'election_status')
-      .where('election_status.id = :id', { id: ELECTION_ENDED })
+      .where('election_status.id = :id', { id: ElectionStatusEnum.ended })
       .getMany();
 
     return endedElections;
