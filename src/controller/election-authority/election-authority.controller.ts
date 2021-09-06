@@ -26,6 +26,7 @@ import { WalletService } from '../../ethereum/wallet/wallet.service';
 import { EthereumElectionService } from '../../ethereum/election/ethereum-election.service';
 import { UsersService } from '../../users/users.service';
 import { ElectionDetailDto } from 'src/elections/dto/election-detail.dto';
+import { ElectionStatusEnum } from 'src/helper/status';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {
@@ -192,6 +193,20 @@ export class ElectionAuthorityController {
     return {
       message: 'Success',
       data: candidatesDto,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('election/:electionId/ready')
+  async setReadyToDeploy(@Param('electionId') electionId: number) {
+    const election = await this.electionService.getElectionById(electionId);
+    await this.electionService.updateElectionStatus(
+      election,
+      ElectionStatusEnum.readyToDeploy,
+    );
+
+    return {
+      message: 'Success',
     };
   }
 
