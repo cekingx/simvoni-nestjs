@@ -18,20 +18,20 @@ import { ElectionService } from '../../elections/election/election.service';
 import { Ballot } from '../../elections/dto/ballot.dto';
 import { EthereumElectionService } from '../../ethereum/election/ethereum-election.service';
 import { WalletService } from '../../ethereum/wallet/wallet.service';
-import { Election } from 'src/elections/entity/election.entity';
-import { ElectionDto } from 'src/elections/dto/election.dto';
-import { FollowedElectionDto } from 'src/elections/dto/followed-election.dto';
-import { Candidate } from 'src/elections/entity/candidate.entity';
-import { CandidateDto } from 'src/elections/dto/candidate.dto';
-import { ElectionDetailDto } from 'src/elections/dto/election-detail.dto';
-import { Misi } from 'src/elections/entity/misi.entity';
-import { Pengalaman } from 'src/elections/entity/pengalaman.entity';
-import { User } from 'src/users/user.entity';
+import { Election } from '../../elections/entity/election.entity';
+import { ElectionDto } from '../../elections/dto/election.dto';
+import { FollowedElectionDto } from '../../elections/dto/followed-election.dto';
+import { Candidate } from '../../elections/entity/candidate.entity';
+import { CandidateDto } from '../../elections/dto/candidate.dto';
+import { ElectionDetailDto } from '../../elections/dto/election-detail.dto';
+import { Misi } from '../../elections/entity/misi.entity';
+import { Pengalaman } from '../../elections/entity/pengalaman.entity';
+import { User } from '../../users/user.entity';
 import {
   EndedCandidateDto,
   EndedElectionDto,
-} from 'src/elections/dto/ended-election.dto';
-import { ParticipationEnum } from 'src/helper/status';
+} from '../../elections/dto/ended-election.dto';
+import { ParticipationEnum } from '../../helper/status';
 
 @Controller('voter')
 export class VoterController {

@@ -25,8 +25,8 @@ import { ElectionParticipant } from '../../elections/entity/election-participant
 import { WalletService } from '../../ethereum/wallet/wallet.service';
 import { EthereumElectionService } from '../../ethereum/election/ethereum-election.service';
 import { UsersService } from '../../users/users.service';
-import { ElectionDetailDto } from 'src/elections/dto/election-detail.dto';
-import { ElectionStatusEnum } from 'src/helper/status';
+import { ElectionDetailDto } from '../../elections/dto/election-detail.dto';
+import { ElectionStatusEnum } from '../../helper/status';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {

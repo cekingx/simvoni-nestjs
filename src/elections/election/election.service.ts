@@ -12,8 +12,8 @@ import { AddCandidateDto } from '../dto/add-candidate.dto';
 import { ElectionParticipant } from '../entity/election-participant.entity';
 import { ParticipationStatus } from '../entity/participation-status.entity';
 import { ElectionDto } from '../dto/election.dto';
-import { UsersService } from 'src/users/users.service';
-import { ElectionStatusEnum } from 'src/helper/status';
+import { UsersService } from '../../users/users.service';
+import { ElectionStatusEnum } from '../../helper/status';
 
 @Injectable()
 export class ElectionService {

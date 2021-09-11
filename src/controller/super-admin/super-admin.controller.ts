@@ -19,7 +19,7 @@ import { UsersService } from '../../users/users.service';
 import { EthereumElectionService } from '../../ethereum/election/ethereum-election.service';
 import { Election } from '../../elections/entity/election.entity';
 import { ElectionDto } from '../../elections/dto/election.dto';
-import { randomString } from 'src/helper/randstr';
+import { randomString } from '../../helper/randstr';
 
 @Controller('super-admin')
 export class SuperAdminController {
