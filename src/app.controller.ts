@@ -21,11 +21,8 @@ import { UsersService } from './users/users.service';
 @Controller()
 export class AppController {
   constructor(
-    private readonly appService: AppService,
     private authService: AuthService,
     private userService: UsersService,
-    private electionService: EthereumElectionService,
-    private walletService: WalletService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -47,54 +44,13 @@ export class AppController {
   }
 
   @Post('register')
-  registerNewUser(@Body() createUserDto: CreateUserDto)
+  async registerNewUser(@Body() createUserDto: CreateUserDto)
   {
-    return this.userService.create(createUserDto);
-  }
+    const { password, walletAddress, randomSeed, ...rest } = await this.userService.create(createUserDto);
 
-  @Get('get-account')
-  getAccount()
-  {
-    return this.electionService.getAccounts();
-  }
-
-  @Post('send-ether')
-  sendEther()
-  {
-    // begin::register-candidate
-    const contractMethods = this.walletService.getContractMethods(
-      '0x6cd26E299450d6278C808CbA96f8488E840D9685', 
-      'REGISTER_CANDIDATE', 
-      'i-dewa-gede-dirga-yasa'
-    );
-
-    return this.walletService.sendEtherForMethods(
-      contractMethods, 
-      '0x5219eFd1C36fb5cf82b51d953b3CBa5F0a47d234', 
-      '0xA47626D97a4c2829c903514b2aEa3D3648219104', 
-      'password'
-    );
-    // end::register-candidate
-
-    // begin::vote
-    // const contractMethods = this.walletService.getContractMethods(
-    //   '0x6cd26E299450d6278C808CbA96f8488E840D9685', 
-    //   'VOTE', 
-    //   'i-dewa-gede-dirga-yasa'
-    // );
-
-    // return this.walletService.sendEtherForMethods(
-    //   contractMethods, 
-    //   '0x5219eFd1C36fb5cf82b51d953b3CBa5F0a47d234', 
-    //   '0xA47626D97a4c2829c903514b2aEa3D3648219104', 
-    //   'password'
-    // );
-    // end::vote
-
-    // begin::start-election
-    // end::start-election
-
-    // begin::end-election
-    // end::end-election
+    return {
+      message: 'Success',
+      data: rest
+    }
   }
 }
