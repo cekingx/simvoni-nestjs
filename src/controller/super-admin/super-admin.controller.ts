@@ -87,28 +87,21 @@ export class SuperAdminController {
 
   @UseGuards(JwtAuthGuard)
   @Post('election-authority')
-  async createElectionAuthority(@Body() createEaDto: CreateEaDto, @Res() res) {
-    try {
-      const ea = await this.userService.createEa(createEaDto);
-      const eaDto: UserDto = {
-        id: ea.id,
-        name: ea.name,
-        username: ea.username,
-        walletAddress: ea.walletAddress,
-        randomSeed: ea.randomSeed,
-        role: ea.userRole.role,
-      };
+  async createElectionAuthority(@Body() createEaDto: CreateEaDto) {
+    const ea = await this.userService.createEa(createEaDto);
+    const eaDto: UserDto = {
+      id: ea.id,
+      name: ea.name,
+      username: ea.username,
+      walletAddress: ea.walletAddress,
+      randomSeed: ea.randomSeed,
+      role: ea.userRole.role,
+    };
 
-      return res.status(HttpStatus.OK).json({
-        message: 'Success',
-        data: eaDto,
-      });
-    } catch (error) {
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .json(this.errorResponseService.errorResponse(error.code));
-      return;
-    }
+    return {
+      message: 'Success',
+      data: eaDto,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
