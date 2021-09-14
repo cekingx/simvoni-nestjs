@@ -68,36 +68,79 @@ describe('SuperAdminController (e2e)', () => {
     await app.init();
   });
 
-  it('/super-admin/election-authority (POST)', async () => {
-    await request(app.getHttpServer())
-      .post('/super-admin/election-authority')
-      .send(ea)
-      .expect(201);
+  describe('/super-admin/election-authority (POST)', () => {
+    it('Create Election Authority', async () => {
+      await request(app.getHttpServer())
+        .post('/super-admin/election-authority')
+        .send(ea)
+        .expect(201);
 
-    const dbData = await userRepository.query(
-      `SELECT * from user where username='${ea.username}'`,
-    );
+      const dbData = await userRepository.query(
+        `SELECT * from user where username='${ea.username}'`,
+      );
 
-    expect(dbData[0].username).toEqual(ea.username);
+      expect(dbData[0].username).toEqual(ea.username);
+    });
   });
 
-  it('/super-admin/election-authority (GET)', async () => {
-    const { body } = await request(app.getHttpServer())
-      .get('/super-admin/election-authority')
-      .expect(200);
+  describe('/super-admin/election-authority (GET)', () => {
+    it('Get All Election Authority', async () => {
+      const { body } = await request(app.getHttpServer())
+        .get('/super-admin/election-authority')
+        .expect(200);
 
-    expect(body.data).toMatchObject([
-      {
-        id: expect.any(Number),
+      expect(body.data).toMatchObject([
+        {
+          id: 1,
+          name: ea.name,
+          username: ea.username,
+          role: 'election_authority',
+        },
+      ]);
+    });
+  });
+
+  describe('/super-admin/election-authority/:id', () => {
+    it('Found EA with id 1', async () => {
+      const { body } = await request(app.getHttpServer())
+        .get('/super-admin/election-authority/1')
+        .expect(200);
+
+      expect(body.data).toMatchObject({
+        id: 1,
         name: ea.name,
         username: ea.username,
         role: 'election_authority',
-      },
-    ]);
+      });
+    });
+
+    it('Not found EA with id 2', async () => {
+      request(app.getHttpServer())
+        .get('/super-admin/election-authority/2')
+        .expect(404);
+    });
   });
 
-  afterAll(() => {
-    userRepository.query('DELETE from user');
-    app.close();
+  describe('/super-admin/election-authority/set-wallet-address/id', () => {
+    it('Create Address for user with id 1', async () => {
+      const { body } = await request(app.getHttpServer())
+        .post('/super-admin/election-authority/set-wallet-address/1')
+        .expect(201);
+
+      const dbData = await userRepository.query(
+        `SELECT * from user where username='${ea.username}'`,
+      );
+
+      expect(body.data).toMatchObject({
+        address: expect.any(String),
+      });
+      expect(dbData[0].walletAddress).toEqual(expect.any(String));
+    });
+  });
+
+  afterAll(async () => {
+    await userRepository.query('DELETE from user');
+    await userRepository.query('ALTER TABLE user AUTO_INCREMENT = 1');
+    await app.close();
   });
 });
