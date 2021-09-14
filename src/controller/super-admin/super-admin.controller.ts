@@ -58,31 +58,24 @@ export class SuperAdminController {
 
   @UseGuards(JwtAuthGuard)
   @Get('election-authority/:userId')
-  async getElectionAuthorityById(@Param('userId') userId: number, @Res() res) {
-    try {
-      const electionAuthority = await this.userService.findElectionAuthorityById(
-        userId,
-      );
+  async getElectionAuthorityById(@Param('userId') userId: number) {
+    const electionAuthority = await this.userService.findElectionAuthorityById(
+      userId,
+    );
 
-      const user: UserDto = {
-        id: electionAuthority.id,
-        name: electionAuthority.name,
-        username: electionAuthority.username,
-        walletAddress: electionAuthority.walletAddress,
-        randomSeed: electionAuthority.randomSeed,
-        role: electionAuthority.userRole.role,
-      };
+    const user: UserDto = {
+      id: electionAuthority.id,
+      name: electionAuthority.name,
+      username: electionAuthority.username,
+      walletAddress: electionAuthority.walletAddress,
+      randomSeed: electionAuthority.randomSeed,
+      role: electionAuthority.userRole.role,
+    };
 
-      const response = {
-        message: 'Success',
-        data: user,
-      };
-      return res.status(HttpStatus.OK).json(response);
-    } catch (error) {
-      return res
-        .status(HttpStatus.NOT_FOUND)
-        .json(this.errorResponseService.notFound());
-    }
+    return {
+      message: 'Success',
+      data: user,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -106,34 +99,29 @@ export class SuperAdminController {
 
   @UseGuards(JwtAuthGuard)
   @Post('election-authority/set-wallet-address/:userId')
-  async setEaWalletAddress(@Param('userId') userId: number, @Res() res) {
-    try {
-      const user: User = await this.userService.findElectionAuthorityById(
-        userId,
-      );
+  async setEaWalletAddress(@Param('userId') userId: number) {
+    const user: User = await this.userService.findElectionAuthorityById(userId);
+    const seed = randomString(10);
 
+    const addressResolver = new Promise((resolve) => {
       if (user.walletAddress == null && user.randomSeed == null) {
-        const seed = randomString(10);
-        this.walletService.createAccount(seed).subscribe((response: any) => {
-          user.walletAddress = response.data.result;
+        this.walletService.createAccount(seed).subscribe(async (response) => {
           user.randomSeed = seed;
-          this.userService.updateUser(user);
-
-          return res.status(HttpStatus.OK).json({
-            message: 'Success',
-            data: {
-              address: response.data.result,
-            },
-          });
+          user.walletAddress = response.result;
+          await this.userService.updateUser(user);
+          resolve(response.result);
         });
+      } else {
+        resolve(user.walletAddress);
       }
-    } catch (error) {
-      console.log(error);
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .json(this.errorResponseService.badRequest());
-      return;
-    }
+    });
+
+    return {
+      message: 'Success',
+      data: {
+        address: await addressResolver,
+      },
+    };
   }
 
   @UseGuards(JwtAuthGuard)

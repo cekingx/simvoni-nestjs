@@ -2,6 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import Web3 from 'web3';
 import { AccountService } from '../account/account.service';
 import { EthereumElectionService } from '../election/ethereum-election.service';
@@ -16,12 +17,14 @@ export class WalletService {
   ) {}
 
   createAccount(password: string): Observable<any> {
-    return this.http.post(process.env.ETH_ENDPOINT, {
-      jsonrpc: '2.0',
-      method: 'parity_newAccountFromPhrase',
-      params: [password, password],
-      id: 0,
-    });
+    return this.http
+      .post(process.env.ETH_ENDPOINT, {
+        jsonrpc: '2.0',
+        method: 'parity_newAccountFromPhrase',
+        params: [password, password],
+        id: 0,
+      })
+      .pipe(map((response) => response.data));
   }
 
   async sendEther(
