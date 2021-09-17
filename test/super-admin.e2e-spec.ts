@@ -14,14 +14,24 @@ import { JwtAuthGuard } from '../src/auth/jwt-auth.guard';
 import { AuthModule } from '../src/auth/auth.module';
 import { Any, Repository } from 'typeorm';
 import { User } from '../src/users/user.entity';
+import { Election } from '../src/elections/entity/election.entity';
 
 describe('SuperAdminController (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;
+  let electionRepository: Repository<Election>;
   const ea = {
     name: 'Election Authority',
     username: 'election-authority',
     password: 'password',
+  };
+  const election = {
+    name: 'Pemira HMTI',
+    description: 'Pemilihan Ketua HMTI',
+    start: '2020-08-18',
+    end: '2020-08-20',
+    ea: 1,
+    status: 2,
   };
 
   beforeAll(async () => {
@@ -64,11 +74,12 @@ describe('SuperAdminController (e2e)', () => {
       .compile();
 
     userRepository = moduleFixture.get('UserRepository');
+    electionRepository = moduleFixture.get('ElectionRepository');
     app = moduleFixture.createNestApplication();
     await app.init();
   });
 
-  describe('/super-admin/election-authority (POST)', () => {
+  describe('POST /super-admin/election-authority', () => {
     it('Create Election Authority', async () => {
       await request(app.getHttpServer())
         .post('/super-admin/election-authority')
@@ -83,7 +94,7 @@ describe('SuperAdminController (e2e)', () => {
     });
   });
 
-  describe('/super-admin/election-authority (GET)', () => {
+  describe('GET /super-admin/election-authority', () => {
     it('Get All Election Authority', async () => {
       const { body } = await request(app.getHttpServer())
         .get('/super-admin/election-authority')
@@ -100,7 +111,7 @@ describe('SuperAdminController (e2e)', () => {
     });
   });
 
-  describe('/super-admin/election-authority/:id', () => {
+  describe('GET /super-admin/election-authority/:id', () => {
     it('Found EA with id 1', async () => {
       const { body } = await request(app.getHttpServer())
         .get('/super-admin/election-authority/1')
@@ -121,7 +132,7 @@ describe('SuperAdminController (e2e)', () => {
     });
   });
 
-  describe('/super-admin/election-authority/set-wallet-address/id', () => {
+  describe('POST /super-admin/election-authority/set-wallet-address/id', () => {
     it('Create Address for user with id 1', async () => {
       const { body } = await request(app.getHttpServer())
         .post('/super-admin/election-authority/set-wallet-address/1')
@@ -138,7 +149,36 @@ describe('SuperAdminController (e2e)', () => {
     });
   });
 
+  describe('GET /super-admin/election/ready-to-deploy', () => {
+    it('Get ready-to-deploy election', async () => {
+      await electionRepository.query(
+        `insert into election 
+        (name, description, start, end, electionAuthorityId, statusId)
+        values 
+        ('${election.name}', '${election.description}', '${election.start}', '${election.end}', '${election.ea}', '${election.status}')`,
+      );
+
+      const { body } = await request(app.getHttpServer())
+        .get('/super-admin/election/ready-to-deploy')
+        .expect(200);
+
+      expect(body.data).toMatchObject([
+        {
+          id: expect.any(Number),
+          name: election.name,
+          description: election.description,
+          start: election.start,
+          end: election.end,
+          status: 'ready_to_deploy',
+          ea: ea.username,
+        },
+      ]);
+    });
+  });
+
   afterAll(async () => {
+    await electionRepository.query('DELETE from election');
+    await electionRepository.query('ALTER TABLE election AUTO_INCREMENT = 1');
     await userRepository.query('DELETE from user');
     await userRepository.query('ALTER TABLE user AUTO_INCREMENT = 1');
     await app.close();
