@@ -12,27 +12,44 @@ import * as request from 'supertest';
 import { ErrorResponseService } from '../src/helper/error-response/error-response.service';
 import { JwtAuthGuard } from '../src/auth/jwt-auth.guard';
 import { AuthModule } from '../src/auth/auth.module';
-import { Any, Repository } from 'typeorm';
+import { Any, Connection, Repository } from 'typeorm';
 import { User } from '../src/users/user.entity';
 import { Election } from '../src/elections/entity/election.entity';
+import { Candidate } from 'src/elections/entity/candidate.entity';
+
+const ea = {
+  name: 'Election Authority',
+  username: 'election-authority',
+  password: 'password',
+};
+
+const election = {
+  name: 'Pemira HMTI',
+  description: 'Pemilihan Ketua HMTI',
+  start: '2020-08-18',
+  end: '2020-08-20',
+  ea: 1,
+  status: 2,
+};
+
+const candidates = [
+  {
+    name: 'Candidate 1',
+    visi: 'Visi 1',
+    electionId: 1,
+    nameSlug: 'candidate-1',
+  },
+  {
+    name: 'Candidate 2',
+    visi: 'Visi 2',
+    electionId: 1,
+    nameSlug: 'candidate-2',
+  },
+];
 
 describe('SuperAdminController (e2e)', () => {
   let app: INestApplication;
-  let userRepository: Repository<User>;
-  let electionRepository: Repository<Election>;
-  const ea = {
-    name: 'Election Authority',
-    username: 'election-authority',
-    password: 'password',
-  };
-  const election = {
-    name: 'Pemira HMTI',
-    description: 'Pemilihan Ketua HMTI',
-    start: '2020-08-18',
-    end: '2020-08-20',
-    ea: 1,
-    status: 2,
-  };
+  let connection: Connection;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -73,8 +90,7 @@ describe('SuperAdminController (e2e)', () => {
       })
       .compile();
 
-    userRepository = moduleFixture.get('UserRepository');
-    electionRepository = moduleFixture.get('ElectionRepository');
+    connection = moduleFixture.get('Connection');
     app = moduleFixture.createNestApplication();
     await app.init();
   });
@@ -86,7 +102,7 @@ describe('SuperAdminController (e2e)', () => {
         .send(ea)
         .expect(201);
 
-      const dbData = await userRepository.query(
+      const dbData = await connection.query(
         `SELECT * from user where username='${ea.username}'`,
       );
 
@@ -138,7 +154,7 @@ describe('SuperAdminController (e2e)', () => {
         .post('/super-admin/election-authority/set-wallet-address/1')
         .expect(201);
 
-      const dbData = await userRepository.query(
+      const dbData = await connection.query(
         `SELECT * from user where username='${ea.username}'`,
       );
 
@@ -151,7 +167,7 @@ describe('SuperAdminController (e2e)', () => {
 
   describe('GET /super-admin/election/ready-to-deploy', () => {
     it('Get ready-to-deploy election', async () => {
-      await electionRepository.query(
+      await connection.query(
         `insert into election 
         (name, description, start, end, electionAuthorityId, statusId)
         values 
@@ -177,10 +193,10 @@ describe('SuperAdminController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await electionRepository.query('DELETE from election');
-    await electionRepository.query('ALTER TABLE election AUTO_INCREMENT = 1');
-    await userRepository.query('DELETE from user');
-    await userRepository.query('ALTER TABLE user AUTO_INCREMENT = 1');
+    await connection.query('DELETE from election');
+    await connection.query('ALTER TABLE election AUTO_INCREMENT = 1');
+    await connection.query('DELETE from user');
+    await connection.query('ALTER TABLE user AUTO_INCREMENT = 1');
     await app.close();
   });
 });
