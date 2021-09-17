@@ -13,9 +13,15 @@ import { ErrorResponseService } from '../src/helper/error-response/error-respons
 import { JwtAuthGuard } from '../src/auth/jwt-auth.guard';
 import { AuthModule } from '../src/auth/auth.module';
 import { Any, Connection, Repository } from 'typeorm';
-import { User } from '../src/users/user.entity';
-import { Election } from '../src/elections/entity/election.entity';
-import { Candidate } from 'src/elections/entity/candidate.entity';
+import { AccountService } from '../src/ethereum/account/account.service';
+
+const superAdmin = {
+  name: 'Super Admin',
+  username: 'super-admin',
+  password: '$2b$10$8nfQAClO146d6qtN/GeCWu9hC62XiIvXp.lbG.Y8WE4WoN57GDxMW',
+  walletAddress: '0x00b108e445c6fb0e38ef3a7d4ba5b4f934471236',
+  userRoleId: '1',
+};
 
 const ea = {
   name: 'Election Authority',
@@ -28,7 +34,7 @@ const election = {
   description: 'Pemilihan Ketua HMTI',
   start: '2020-08-18',
   end: '2020-08-20',
-  ea: 1,
+  ea: 2,
   status: 2,
 };
 
@@ -50,6 +56,7 @@ const candidates = [
 describe('SuperAdminController (e2e)', () => {
   let app: INestApplication;
   let connection: Connection;
+  let accountService: AccountService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -91,8 +98,15 @@ describe('SuperAdminController (e2e)', () => {
       .compile();
 
     connection = moduleFixture.get('Connection');
+    accountService = moduleFixture.get('AccountService');
     app = moduleFixture.createNestApplication();
     await app.init();
+    await connection.query(`
+      insert into user
+      (name, username, password, walletAddress, userRoleId)
+      values
+      ('${superAdmin.name}', '${superAdmin.username}', '${superAdmin.password}', '${superAdmin.walletAddress}', '${superAdmin.userRoleId}')
+    `);
   });
 
   describe('POST /super-admin/election-authority', () => {
@@ -118,7 +132,7 @@ describe('SuperAdminController (e2e)', () => {
 
       expect(body.data).toMatchObject([
         {
-          id: 1,
+          id: 2,
           name: ea.name,
           username: ea.username,
           role: 'election_authority',
@@ -128,22 +142,22 @@ describe('SuperAdminController (e2e)', () => {
   });
 
   describe('GET /super-admin/election-authority/:id', () => {
-    it('Found EA with id 1', async () => {
+    it('Found EA with id 2', async () => {
       const { body } = await request(app.getHttpServer())
-        .get('/super-admin/election-authority/1')
+        .get('/super-admin/election-authority/2')
         .expect(200);
 
       expect(body.data).toMatchObject({
-        id: 1,
+        id: 2,
         name: ea.name,
         username: ea.username,
         role: 'election_authority',
       });
     });
 
-    it('Not found EA with id 2', async () => {
+    it('Not found EA with id 3', async () => {
       request(app.getHttpServer())
-        .get('/super-admin/election-authority/2')
+        .get('/super-admin/election-authority/3')
         .expect(404);
     });
   });
@@ -151,7 +165,7 @@ describe('SuperAdminController (e2e)', () => {
   describe('POST /super-admin/election-authority/set-wallet-address/id', () => {
     it('Create Address for user with id 1', async () => {
       const { body } = await request(app.getHttpServer())
-        .post('/super-admin/election-authority/set-wallet-address/1')
+        .post('/super-admin/election-authority/set-wallet-address/2')
         .expect(201);
 
       const dbData = await connection.query(
@@ -192,7 +206,25 @@ describe('SuperAdminController (e2e)', () => {
     });
   });
 
+  describe('POST /super-admin/deploy-election/:electionId', async () => {
+    it('Deploy election to blockchain', async () => {
+      await connection.query(
+        `insert into candidate
+        (name, visi, electionId, nameSlug)
+        values
+        ('${candidates[0].name}', '${candidates[0].visi}', ${candidates[0].electionId}, '${candidates[0].nameSlug}'),
+        ('${candidates[1].name}', '${candidates[1].visi}', ${candidates[1].electionId}, '${candidates[1].nameSlug}')`,
+      );
+
+      const { body } = await request(app.getHttpServer())
+        .post('/super-admin/deploy-election/1')
+        .expect(200);
+    });
+  });
+
   afterAll(async () => {
+    await connection.query('DELETE from candidate');
+    await connection.query('ALTER TABLE candidate AUTO_INCREMENT = 1');
     await connection.query('DELETE from election');
     await connection.query('ALTER TABLE election AUTO_INCREMENT = 1');
     await connection.query('DELETE from user');

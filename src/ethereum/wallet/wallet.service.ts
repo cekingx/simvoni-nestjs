@@ -21,7 +21,7 @@ export class WalletService {
       .post(process.env.ETH_ENDPOINT, {
         jsonrpc: '2.0',
         method: 'parity_newAccountFromPhrase',
-        params: [password, password],
+        params: [password, process.env.ETH_PASSWORD],
         id: 0,
       })
       .pipe(map((response) => response.data));
