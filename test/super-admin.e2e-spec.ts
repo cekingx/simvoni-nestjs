@@ -228,6 +228,10 @@ describe('SuperAdminController (e2e)', () => {
       const { body } = await request(app.getHttpServer())
         .post('/super-admin/deploy-election/1')
         .expect(201);
+
+      expect(body.data).toMatchObject({
+        address: expect.any(String),
+      });
     });
   });
 
