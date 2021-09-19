@@ -1,10 +1,8 @@
 import { ExecutionContext, INestApplication } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AuthGuard } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SuperAdminController } from '../src/controller/super-admin/super-admin.controller';
-import { CreateEaDto } from '../src/users/create-ea.dto';
 import { ElectionsModule } from '../src/elections/elections.module';
 import { EthereumModule } from '../src/ethereum/ethereum.module';
 import { UsersModule } from '../src/users/users.module';
@@ -12,8 +10,7 @@ import * as request from 'supertest';
 import { ErrorResponseService } from '../src/helper/error-response/error-response.service';
 import { JwtAuthGuard } from '../src/auth/jwt-auth.guard';
 import { AuthModule } from '../src/auth/auth.module';
-import { Any, Connection, Repository } from 'typeorm';
-import { AccountService } from '../src/ethereum/account/account.service';
+import { Connection } from 'typeorm';
 import { CustomLogger } from '../src/logger/logger.service';
 import { LoggerModule } from '../src/logger/logger.module';
 
@@ -59,7 +56,6 @@ global.console.warn = jest.fn();
 describe('SuperAdminController (e2e)', () => {
   let app: INestApplication;
   let connection: Connection;
-  let accountService: AccountService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -107,7 +103,6 @@ describe('SuperAdminController (e2e)', () => {
       .compile();
 
     connection = moduleFixture.get('Connection');
-    accountService = moduleFixture.get('AccountService');
     app = moduleFixture.createNestApplication();
     await app.init();
     await connection.query(`
