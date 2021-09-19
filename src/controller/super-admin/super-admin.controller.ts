@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
   HttpStatus,
+  Logger,
   Param,
   Post,
   Res,
@@ -20,6 +22,7 @@ import { EthereumElectionService } from '../../ethereum/election/ethereum-electi
 import { Election } from '../../elections/entity/election.entity';
 import { ElectionDto } from '../../elections/dto/election.dto';
 import { randomString } from '../../helper/randstr';
+import { CustomLogger } from '../../logger/logger.service';
 
 @Controller('super-admin')
 export class SuperAdminController {
@@ -29,6 +32,7 @@ export class SuperAdminController {
     private walletService: WalletService,
     private electionService: ElectionService,
     private ethereumElectionService: EthereumElectionService,
+    private logger: CustomLogger,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -59,23 +63,27 @@ export class SuperAdminController {
   @UseGuards(JwtAuthGuard)
   @Get('election-authority/:userId')
   async getElectionAuthorityById(@Param('userId') userId: number) {
-    const electionAuthority = await this.userService.findElectionAuthorityById(
-      userId,
-    );
+    try {
+      const electionAuthority = await this.userService.findElectionAuthorityById(
+        userId,
+      );
 
-    const user: UserDto = {
-      id: electionAuthority.id,
-      name: electionAuthority.name,
-      username: electionAuthority.username,
-      walletAddress: electionAuthority.walletAddress,
-      randomSeed: electionAuthority.randomSeed,
-      role: electionAuthority.userRole.role,
-    };
+      const user: UserDto = {
+        id: electionAuthority.id,
+        name: electionAuthority.name,
+        username: electionAuthority.username,
+        walletAddress: electionAuthority.walletAddress,
+        randomSeed: electionAuthority.randomSeed,
+        role: electionAuthority.userRole.role,
+      };
 
-    return {
-      message: 'Success',
-      data: user,
-    };
+      return {
+        message: 'Success',
+        data: user,
+      };
+    } catch (error) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
   }
 
   @UseGuards(JwtAuthGuard)
@@ -212,7 +220,7 @@ export class SuperAdminController {
         ea.walletAddress,
         process.env.ETH_PASSWORD,
       );
-      console.log('[Candidate] ' + receipt);
+      this.logger.log('[Candidate] ' + receipt);
     }
 
     return {

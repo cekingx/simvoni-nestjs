@@ -1,4 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
+import { CustomLogger } from '../../logger/logger.service';
 import web3 from 'web3';
 import { AccountService } from '../account/account.service';
 import * as contractFile from './BallotContract.json';
@@ -12,6 +13,7 @@ export class EthereumElectionService {
     @Inject('web3') private web3: web3,
     @Inject('Contract') private Contract: any,
     private accountService: AccountService,
+    private logger: CustomLogger,
   ) {
     this.abi = contractFile.abi;
     this.bytecode = contractFile.bytecode;
@@ -26,6 +28,7 @@ export class EthereumElectionService {
     this.accountService.unlockAccount(sender, senderPassword);
 
     try {
+      const logger = this.logger;
       const contractInstance = await this.Contract.deploy({
         data: this.bytecode,
       })
@@ -34,20 +37,25 @@ export class EthereumElectionService {
           gas: process.env.ETH_CONTRACT_GAS,
         })
         .on('error', function (error) {
-          console.log('[deployErr] ' + error);
+          // console.log('[deployErr] ' + error);
+          logger.error('[deployErr] ' + error);
         })
         .on('transactionHash', function (transactionHash) {
-          console.log('[trxHash] ' + transactionHash);
+          // console.log('[trxHash] ' + transactionHash);
+          logger.log('[trxHash] ' + transactionHash);
         })
         .on('receipt', function (receipt) {
-          console.log('[contractAddress] ' + receipt.contractAddress); // contains the new contract address
+          // console.log('[contractAddress] ' + receipt.contractAddress); // contains the new contract address
+          logger.log('[contractAddress] ' + receipt.contractAddress); // contains the new contract address
         })
         .on('confirmation', function (confirmationNumber, receipt) {
-          console.log('[confirmation] ' + confirmationNumber, receipt);
+          // console.log('[confirmation] ' + confirmationNumber, receipt);
+          logger.debug('[confirmation] ' + confirmationNumber, receipt);
         });
       return contractInstance.options.address;
     } catch (error) {
-      console.log('[DeployContractErr] ' + error);
+      // console.log('[DeployContractErr] ' + error);
+      this.logger.error('[DeployContractErr] ' + error);
     }
   }
 
@@ -66,6 +74,7 @@ export class EthereumElectionService {
     this.accountService.unlockAccount(sender, senderPassword);
 
     try {
+      const logger = this.logger;
       const receipt = await contract.methods
         .register_candidate(name)
         .send({
@@ -73,21 +82,26 @@ export class EthereumElectionService {
           gas: '0xDBBA0',
         })
         .on('error', function (error) {
-          console.log('[RegisterErr] ' + error);
+          // console.log('[RegisterErr] ' + error);
+          logger.error('[RegisterErr] ' + error);
         })
         .on('transactionHash', function (transactionHash) {
-          console.log('[registerTrxHash] ' + transactionHash);
+          // console.log('[registerTrxHash] ' + transactionHash);
+          logger.log('[registerTrxHash] ' + transactionHash);
         })
         .on('receipt', function (receipt) {
-          console.log('[registerReceipt] ' + receipt); // contains the new contract address
+          // console.log('[registerReceipt] ' + receipt); // contains the new contract address
+          logger.log('[registerReceipt] ' + receipt); // contains the new contract address
         })
         .on('confirmation', function (confirmationNumber, receipt) {
-          console.log('[registerConfirmation] ' + confirmationNumber, receipt);
+          // console.log('[registerConfirmation] ' + confirmationNumber, receipt);
+          logger.debug('[registerConfirmation] ' + confirmationNumber, receipt);
         });
 
       return receipt;
     } catch (error) {
-      console.log('[RegCandidateErr ]' + error);
+      // console.log('[RegCandidateErr ]' + error);
+      this.logger.error('[RegCandidateErr ]' + error);
     }
   }
 

@@ -6,6 +6,7 @@ import { AccountService } from './account/account.service';
 const web3 = require('web3');
 import * as contractFile from './election/BallotContract.json';
 import { HttpModule } from '@nestjs/axios';
+import { LoggerModule } from '../logger/logger.module';
 
 const web3Factory = {
   provide: 'web3',
@@ -22,7 +23,7 @@ const contractFactory = {
   },
 };
 @Module({
-  imports: [HttpModule],
+  imports: [HttpModule, LoggerModule],
   providers: [
     EthereumElectionService,
     web3Factory,

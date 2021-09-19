@@ -14,6 +14,8 @@ import { JwtAuthGuard } from '../src/auth/jwt-auth.guard';
 import { AuthModule } from '../src/auth/auth.module';
 import { Any, Connection, Repository } from 'typeorm';
 import { AccountService } from '../src/ethereum/account/account.service';
+import { CustomLogger } from '../src/logger/logger.service';
+import { LoggerModule } from '../src/logger/logger.module';
 
 const superAdmin = {
   name: 'Super Admin',
@@ -53,6 +55,7 @@ const candidates = [
   },
 ];
 
+global.console.warn = jest.fn();
 describe('SuperAdminController (e2e)', () => {
   let app: INestApplication;
   let connection: Connection;
@@ -65,6 +68,7 @@ describe('SuperAdminController (e2e)', () => {
         UsersModule,
         ElectionsModule,
         EthereumModule,
+        LoggerModule,
         ConfigModule.forRoot({
           isGlobal: true,
         }),
@@ -94,6 +98,11 @@ describe('SuperAdminController (e2e)', () => {
           };
           return true;
         },
+      })
+      .overrideProvider(CustomLogger)
+      .useValue({
+        log: jest.fn(),
+        debug: jest.fn(),
       })
       .compile();
 
@@ -156,7 +165,7 @@ describe('SuperAdminController (e2e)', () => {
     });
 
     it('Not found EA with id 3', async () => {
-      request(app.getHttpServer())
+      await request(app.getHttpServer())
         .get('/super-admin/election-authority/3')
         .expect(404);
     });
@@ -206,7 +215,7 @@ describe('SuperAdminController (e2e)', () => {
     });
   });
 
-  describe('POST /super-admin/deploy-election/:electionId', async () => {
+  describe('POST /super-admin/deploy-election/:electionId', () => {
     it('Deploy election to blockchain', async () => {
       await connection.query(
         `insert into candidate
@@ -218,7 +227,7 @@ describe('SuperAdminController (e2e)', () => {
 
       const { body } = await request(app.getHttpServer())
         .post('/super-admin/deploy-election/1')
-        .expect(200);
+        .expect(201);
     });
   });
 
