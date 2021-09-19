@@ -11,6 +11,8 @@ import { ElectionAuthorityController } from './controller/election-authority/ele
 import { ElectionsModule } from './elections/elections.module';
 import { VoterController } from './controller/voter/voter.controller';
 import { ConfigModule } from '@nestjs/config';
+import { CustomLogger } from './logger/logger.service';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { ConfigModule } from '@nestjs/config';
       synchronize: true,
     }),
     EthereumModule,
+    LoggerModule,
   ],
   controllers: [
     AppController,
