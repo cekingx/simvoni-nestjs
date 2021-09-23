@@ -153,7 +153,14 @@ export class ElectionAuthorityController {
     );
 
     if (isValidEa) {
-      return this.electionService.addCandidate(addCandidateDto, electionId);
+      const candidate = await this.electionService.addCandidate(
+        addCandidateDto,
+        electionId,
+      );
+      return {
+        message: 'Success',
+        data: candidate,
+      };
     }
 
     return false;
