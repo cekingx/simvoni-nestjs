@@ -13,6 +13,8 @@ import { LoggerModule } from '../src/logger/logger.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ElectionAuthorityController } from '../src/controller/election-authority/election-authority.controller';
+import { Candidate } from 'src/elections/entity/candidate.entity';
+import { AddCandidateDto } from 'src/elections/dto/add-candidate.dto';
 
 const superAdmin = {
   name: 'Super Admin',
@@ -39,10 +41,47 @@ const election = {
   ea: 2,
 };
 
+const candidate = {
+  id: 1,
+  name: 'Candidate',
+  nameSlug: 'candidate',
+  visi: 'visi',
+  election: 'Election',
+  misi: ['misi', 'misi'],
+  pengalaman: ['pengalaman', 'pengalaman'],
+};
+
 global.console.warn = jest.fn();
 describe('ElectionAuthorityController (e2e)', () => {
   let app: INestApplication;
   let connection: Connection;
+
+  const clearDb = async () => {
+    await connection.query('DELETE from misi');
+    await connection.query('ALTER TABLE misi AUTO_INCREMENT = 1');
+    await connection.query('DELETE from pengalaman');
+    await connection.query('ALTER TABLE pengalaman AUTO_INCREMENT = 1');
+    await connection.query('DELETE from candidate');
+    await connection.query('ALTER TABLE candidate AUTO_INCREMENT = 1');
+    await connection.query('DELETE from election');
+    await connection.query('ALTER TABLE election AUTO_INCREMENT = 1');
+    await connection.query('DELETE from user');
+    await connection.query('ALTER TABLE user AUTO_INCREMENT = 1');
+  };
+  const populateDb = async () => {
+    await connection.query(`
+      insert into user
+      (name, username, password, walletAddress, userRoleId)
+      values
+      ('${superAdmin.name}', '${superAdmin.username}', '${superAdmin.password}', '${superAdmin.walletAddress}', '${superAdmin.userRoleId}')
+    `);
+    await connection.query(`
+      insert into user
+      (name, username, password, walletAddress, userRoleId)
+      values
+      ('${electionAuthority.name}', '${electionAuthority.username}', '${electionAuthority.password}', '${electionAuthority.walletAddress}', '${electionAuthority.userRoleId}')
+    `);
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -92,18 +131,8 @@ describe('ElectionAuthorityController (e2e)', () => {
     connection = moduleFixture.get('Connection');
     app = moduleFixture.createNestApplication();
     await app.init();
-    await connection.query(`
-      insert into user
-      (name, username, password, walletAddress, userRoleId)
-      values
-      ('${superAdmin.name}', '${superAdmin.username}', '${superAdmin.password}', '${superAdmin.walletAddress}', '${superAdmin.userRoleId}')
-    `);
-    await connection.query(`
-      insert into user
-      (name, username, password, walletAddress, userRoleId)
-      values
-      ('${electionAuthority.name}', '${electionAuthority.username}', '${electionAuthority.password}', '${electionAuthority.walletAddress}', '${electionAuthority.userRoleId}')
-    `);
+    await clearDb();
+    await populateDb();
   });
 
   describe('POST /election-authority/election', () => {
@@ -114,18 +143,80 @@ describe('ElectionAuthorityController (e2e)', () => {
         start: election.start,
         end: election.end,
       };
+
       await request(app.getHttpServer())
         .post('/election-authority/election')
         .send(createElection)
         .expect(201);
+      const dbData = await connection.query(
+        `SELECT * from election where id=1`,
+      );
+
+      expect(dbData[0].name).toEqual(election.name);
+    });
+  });
+
+  describe('GET /election-authority/elections', () => {
+    it('Get All Election Created by Election Authority', async () => {
+      const { body } = await request(app.getHttpServer())
+        .get('/election-authority/elections')
+        .expect(200);
+
+      expect(body.data).toMatchObject([
+        {
+          id: expect.any(Number),
+          name: election.name,
+          description: election.description,
+          start: election.start,
+          end: election.end,
+          status: 'draft',
+          ea: electionAuthority.username,
+        },
+      ]);
+    });
+  });
+
+  describe('GET /election-authority/election/:id', () => {
+    it('Get Election By Id 1', async () => {
+      const { body } = await request(app.getHttpServer())
+        .get('/election-authority/election/1')
+        .expect(200);
+
+      expect(body.data).toMatchObject({
+        id: expect.any(Number),
+        name: election.name,
+        description: election.description,
+        start: election.start,
+        end: election.end,
+        status: 'draft',
+        ea: electionAuthority.username,
+      });
+    });
+  });
+
+  describe('POST /election-authority/add-candidate/:id', () => {
+    it('Add Candidate to An Election', async () => {
+      const addCandidate: AddCandidateDto = {
+        name: candidate.name,
+        visi: candidate.visi,
+        misi: candidate.misi,
+        pengalaman: candidate.pengalaman,
+      };
+
+      await request(app.getHttpServer())
+        .post('/election-authority/add-candidate/1')
+        .send(addCandidate)
+        .expect(201);
+
+      const dbData = await connection.query(
+        `SELECT * from candidate where id=1`,
+      );
+
+      expect(dbData[0].name).toEqual(candidate.name);
     });
   });
 
   afterAll(async () => {
-    await connection.query('DELETE from election');
-    await connection.query('ALTER TABLE election AUTO_INCREMENT = 1');
-    await connection.query('DELETE from user');
-    await connection.query('ALTER TABLE user AUTO_INCREMENT = 1');
     await app.close();
   });
 });
