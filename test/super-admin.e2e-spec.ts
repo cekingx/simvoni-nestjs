@@ -57,6 +57,23 @@ describe('SuperAdminController (e2e)', () => {
   let app: INestApplication;
   let connection: Connection;
 
+  const clearDb = async () => {
+    await connection.query('DELETE from candidate');
+    await connection.query('ALTER TABLE candidate AUTO_INCREMENT = 1');
+    await connection.query('DELETE from election');
+    await connection.query('ALTER TABLE election AUTO_INCREMENT = 1');
+    await connection.query('DELETE from user');
+    await connection.query('ALTER TABLE user AUTO_INCREMENT = 1');
+  };
+  const populateDb = async () => {
+    await connection.query(`
+      insert into user
+      (name, username, password, walletAddress, userRoleId)
+      values
+      ('${superAdmin.name}', '${superAdmin.username}', '${superAdmin.password}', '${superAdmin.walletAddress}', '${superAdmin.userRoleId}')
+    `);
+  };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -105,12 +122,8 @@ describe('SuperAdminController (e2e)', () => {
     connection = moduleFixture.get('Connection');
     app = moduleFixture.createNestApplication();
     await app.init();
-    await connection.query(`
-      insert into user
-      (name, username, password, walletAddress, userRoleId)
-      values
-      ('${superAdmin.name}', '${superAdmin.username}', '${superAdmin.password}', '${superAdmin.walletAddress}', '${superAdmin.userRoleId}')
-    `);
+    await clearDb();
+    await populateDb();
   });
 
   describe('POST /super-admin/election-authority', () => {
@@ -231,12 +244,6 @@ describe('SuperAdminController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await connection.query('DELETE from candidate');
-    await connection.query('ALTER TABLE candidate AUTO_INCREMENT = 1');
-    await connection.query('DELETE from election');
-    await connection.query('ALTER TABLE election AUTO_INCREMENT = 1');
-    await connection.query('DELETE from user');
-    await connection.query('ALTER TABLE user AUTO_INCREMENT = 1');
     await app.close();
   });
 });
