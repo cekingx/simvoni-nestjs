@@ -216,6 +216,41 @@ describe('ElectionAuthorityController (e2e)', () => {
     });
   });
 
+  describe('GET /election-authority/election/:id/candidates', () => {
+    it('Show All Candidate of An Election', async () => {
+      const { body } = await request(app.getHttpServer())
+        .get('/election-authority/election/1/candidates')
+        .expect(200);
+
+      expect(body.data).toMatchObject([
+        {
+          id: expect.any(Number),
+          name: candidate.name,
+          visi: candidate.visi,
+          misi: candidate.misi,
+          pengalaman: candidate.pengalaman,
+        },
+      ]);
+    });
+  });
+
+  describe('POST /election-authority/election/:id/ready', () => {
+    it('Set Election Status to ready_to_deploy', async () => {
+      await request(app.getHttpServer())
+        .post('/election-authority/election/1/ready')
+        .expect(201);
+
+      const dbData = await connection.query(
+        `SELECT election_status.status
+        from election
+        inner join election_status
+        on election.statusId = election_status.id
+        where election.id=1`,
+      );
+      expect(dbData[0].status).toEqual('ready_to_deploy');
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });
