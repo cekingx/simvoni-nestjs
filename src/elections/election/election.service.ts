@@ -320,7 +320,7 @@ export class ElectionService {
   async rejectParticipation(electionParticipant: ElectionParticipant) {
     const participationStatus = await this.participationStatusRepository
       .createQueryBuilder('participation_status')
-      .where('participation_status.id = :id', { id: 3 })
+      .where('participation_status.id = :id', { id: 4 })
       .getOne();
 
     electionParticipant.status = participationStatus;

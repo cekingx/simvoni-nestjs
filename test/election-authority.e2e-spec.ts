@@ -32,6 +32,14 @@ const electionAuthority = {
   userRoleId: '2',
 };
 
+const voter = {
+  name: 'Voter',
+  username: 'voter',
+  password: '$2b$10$yr6HNf15aJY.eQHBPk0IZOmc.3kAPuNtPhjMR9MiWGLhW.EHI501W',
+  walletAddress: '0x0007b3a2938f0441d7e92fb0a7a0c1d014c26fac',
+  userRoleId: '3',
+};
+
 const election = {
   name: 'Election',
   description: 'Some election',
@@ -57,6 +65,10 @@ describe('ElectionAuthorityController (e2e)', () => {
   let connection: Connection;
 
   const clearDb = async () => {
+    await connection.query('delete from election_participant');
+    await connection.query(
+      'alter table election_participant auto_increment = 1',
+    );
     await connection.query('DELETE from misi');
     await connection.query('ALTER TABLE misi AUTO_INCREMENT = 1');
     await connection.query('DELETE from pengalaman');
@@ -80,6 +92,12 @@ describe('ElectionAuthorityController (e2e)', () => {
       (name, username, password, walletAddress, userRoleId)
       values
       ('${electionAuthority.name}', '${electionAuthority.username}', '${electionAuthority.password}', '${electionAuthority.walletAddress}', '${electionAuthority.userRoleId}')
+    `);
+    await connection.query(`
+      insert into user
+      (name, username, password, walletAddress, userRoleId)
+      values
+      ('${voter.name}', '${voter.username}', '${voter.password}', '${voter.walletAddress}', '${voter.userRoleId}')
     `);
   };
 
@@ -248,6 +266,41 @@ describe('ElectionAuthorityController (e2e)', () => {
         where election.id=1`,
       );
       expect(dbData[0].status).toEqual('ready_to_deploy');
+    });
+  });
+
+  describe('POST /election-authority/election-participant/accept/:id', () => {
+    it('Accept Participant', async () => {
+      await connection.query(`
+        insert into election_participant
+        (electionId, participantId, statusId) 
+        values
+        (1, 3, 1)
+      `);
+
+      await request(app.getHttpServer())
+        .post('/election-authority/election-participant/accept/1')
+        .expect(201);
+
+      const dbData = await connection.query(
+        `select * from election_participant
+        where id = 1`,
+      );
+      expect(dbData[0].statusId).toEqual(2);
+    });
+  });
+
+  describe('POST /election-authority/election-participant/reject/:id', () => {
+    it('Reject Participant', async () => {
+      await request(app.getHttpServer())
+        .post('/election-authority/election-participant/reject/1')
+        .expect(201);
+
+      const dbData = await connection.query(
+        `select * from election_participant
+        where id = 1`,
+      );
+      expect(dbData[0].statusId).toEqual(4);
     });
   });
 

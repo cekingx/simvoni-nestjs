@@ -258,7 +258,7 @@ export class ElectionAuthorityController {
     const electionParticipation = await this.electionService.getElectionParticipationById(
       participationId,
     );
-    this.electionService.acceptParticipation(electionParticipation);
+    await this.electionService.acceptParticipation(electionParticipation);
 
     return {
       message: 'Success',
@@ -272,7 +272,7 @@ export class ElectionAuthorityController {
     const electionParticipation = await this.electionService.getElectionParticipationById(
       participationId,
     );
-    this.electionService.rejectParticipation(electionParticipation);
+    await this.electionService.rejectParticipation(electionParticipation);
 
     return {
       message: 'Success',
