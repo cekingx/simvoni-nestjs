@@ -37,24 +37,19 @@ export class EthereumElectionService {
           gas: process.env.ETH_CONTRACT_GAS,
         })
         .on('error', function (error) {
-          // console.log('[deployErr] ' + error);
           logger.error('[deployErr] ' + error);
         })
         .on('transactionHash', function (transactionHash) {
-          // console.log('[trxHash] ' + transactionHash);
           logger.log('[trxHash] ' + transactionHash);
         })
         .on('receipt', function (receipt) {
-          // console.log('[contractAddress] ' + receipt.contractAddress); // contains the new contract address
           logger.log('[contractAddress] ' + receipt.contractAddress); // contains the new contract address
         })
         .on('confirmation', function (confirmationNumber, receipt) {
-          // console.log('[confirmation] ' + confirmationNumber, receipt);
           logger.debug('[confirmation] ' + confirmationNumber, receipt);
         });
       return contractInstance.options.address;
     } catch (error) {
-      // console.log('[DeployContractErr] ' + error);
       this.logger.error('[DeployContractErr] ' + error);
     }
   }
@@ -82,25 +77,20 @@ export class EthereumElectionService {
           gas: '0xDBBA0',
         })
         .on('error', function (error) {
-          // console.log('[RegisterErr] ' + error);
           logger.error('[RegisterErr] ' + error);
         })
         .on('transactionHash', function (transactionHash) {
-          // console.log('[registerTrxHash] ' + transactionHash);
           logger.log('[registerTrxHash] ' + transactionHash);
         })
         .on('receipt', function (receipt) {
-          // console.log('[registerReceipt] ' + receipt); // contains the new contract address
           logger.log('[registerReceipt] ' + receipt); // contains the new contract address
         })
         .on('confirmation', function (confirmationNumber, receipt) {
-          // console.log('[registerConfirmation] ' + confirmationNumber, receipt);
           logger.debug('[registerConfirmation] ' + confirmationNumber, receipt);
         });
 
       return receipt;
     } catch (error) {
-      // console.log('[RegCandidateErr ]' + error);
       this.logger.error('[RegCandidateErr ]' + error);
     }
   }
