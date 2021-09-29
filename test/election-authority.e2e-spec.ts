@@ -15,6 +15,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ElectionAuthorityController } from '../src/controller/election-authority/election-authority.controller';
 import { Candidate } from 'src/elections/entity/candidate.entity';
 import { AddCandidateDto } from 'src/elections/dto/add-candidate.dto';
+import { SuperAdminController } from '../src/controller/super-admin/super-admin.controller';
+import { ErrorResponseService } from '../src/helper/error-response/error-response.service';
 
 const superAdmin = {
   name: 'Super Admin',
@@ -123,8 +125,8 @@ describe('ElectionAuthorityController (e2e)', () => {
           synchronize: true,
         }),
       ],
-      controllers: [ElectionAuthorityController],
-      providers: [],
+      controllers: [ElectionAuthorityController, SuperAdminController],
+      providers: [ErrorResponseService],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({
@@ -301,6 +303,42 @@ describe('ElectionAuthorityController (e2e)', () => {
         where id = 1`,
       );
       expect(dbData[0].statusId).toEqual(4);
+    });
+  });
+
+  describe('POST /election-authority/start-election/:id', () => {
+    it('Start Election', async () => {
+      await request(app.getHttpServer()).post('/super-admin/deploy-election/1');
+
+      await request(app.getHttpServer())
+        .post('/election-authority/start-election/1')
+        .expect(201);
+
+      const dbData = await connection.query(
+        `SELECT election_status.status
+        from election
+        inner join election_status
+        on election.statusId = election_status.id
+        where election.id=1`,
+      );
+      expect(dbData[0].status).toEqual('started');
+    });
+  });
+
+  describe('POST /election-authority/end-election/:id', () => {
+    it('End Election', async () => {
+      await request(app.getHttpServer())
+        .post('/election-authority/end-election/1')
+        .expect(201);
+
+      const dbData = await connection.query(
+        `SELECT election_status.status
+        from election
+        inner join election_status
+        on election.statusId = election_status.id
+        where election.id=1`,
+      );
+      expect(dbData[0].status).toEqual('ended');
     });
   });
 

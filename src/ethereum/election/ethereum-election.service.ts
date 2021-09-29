@@ -130,25 +130,26 @@ export class EthereumElectionService {
     this.accountService.unlockAccount(sender, senderPassword);
 
     try {
+      const logger = this.logger;
       const receipt = await contract.methods
         .start_election()
         .send({ from: sender, gas: '0xdbba0' })
         .on('error', function (error) {
-          console.log('[StartErr] ' + error);
+          logger.error('[StartErr] ' + error);
         })
         .on('transactionHash', function (transactionHash) {
-          console.log('[startTrxHash] ' + transactionHash);
+          logger.log('[startTrxHash] ' + transactionHash);
         })
         .on('receipt', function (receipt) {
-          console.log('[startReceipt] ' + receipt); // contains the new contract address
+          logger.log('[startReceipt] ' + receipt);
         })
         .on('confirmation', function (confirmationNumber, receipt) {
-          console.log('[startConfirmation] ' + confirmationNumber, receipt);
+          logger.debug('[startConfirmation] ' + confirmationNumber, receipt);
         });
 
       return receipt;
     } catch (error) {
-      console.log('[StartElecErr] ' + error);
+      this.logger.error('[StartElecErr] ' + error);
     }
   }
 
@@ -156,13 +157,26 @@ export class EthereumElectionService {
     this.accountService.unlockAccount(sender, senderPassword);
 
     try {
+      const logger = this.logger;
       const receipt = await contract.methods
         .end_election()
-        .send({ from: sender, gas: '0xdbba0' });
+        .send({ from: sender, gas: '0xdbba0' })
+        .on('error', function (error) {
+          logger.error('[EndErr] ' + error);
+        })
+        .on('transactionHash', function (transactionHash) {
+          logger.log('[endTrxHash] ' + transactionHash);
+        })
+        .on('receipt', function (receipt) {
+          logger.log('[endReceipt] ' + receipt);
+        })
+        .on('confirmation', function (confirmationNumber, receipt) {
+          logger.debug('[endConfirmation] ' + confirmationNumber, receipt);
+        });
 
       return receipt;
     } catch (error) {
-      console.log('[EndElecErr] ' + error);
+      this.logger.error('[EndElecErr] ' + error);
     }
   }
 
