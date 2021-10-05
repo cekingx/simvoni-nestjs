@@ -58,6 +58,14 @@ describe('SuperAdminController (e2e)', () => {
   let connection: Connection;
 
   const clearDb = async () => {
+    await connection.query('delete from election_participant');
+    await connection.query(
+      'alter table election_participant auto_increment = 1',
+    );
+    await connection.query('DELETE from misi');
+    await connection.query('ALTER TABLE misi AUTO_INCREMENT = 1');
+    await connection.query('DELETE from pengalaman');
+    await connection.query('ALTER TABLE pengalaman AUTO_INCREMENT = 1');
     await connection.query('DELETE from candidate');
     await connection.query('ALTER TABLE candidate AUTO_INCREMENT = 1');
     await connection.query('DELETE from election');
