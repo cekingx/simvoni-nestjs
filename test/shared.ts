@@ -113,8 +113,31 @@ export const populateUser = async (connection: Connection) => {
 export const populateElection = async (connection: Connection) => {
   await connection.query(`
     insert into election
-    (name, description,start,end,electionAuthorityId,statusId)
+    (name, description, start, end, electionAuthorityId, statusId)
     values
     ('${election.name}','${election.description}','${election.start}','${election.end}',${election.ea},${election.status});
+  `);
+};
+
+export const populateCandidate = async (connection: Connection) => {
+  await connection.query(`
+    insert into candidate
+    (name, visi, electionId, nameSlug)
+    values
+    ('${candidate.name}', '${candidate.visi}', ${followedElection.id}, '${candidate.nameSlug}')
+  `);
+  await connection.query(`
+    insert into misi
+    (misi, candidateId)
+    values
+    ('${candidate.misi[0]}', 1),
+    ('${candidate.misi[1]}', 1)
+  `);
+  await connection.query(`
+    insert into pengalaman
+    (pengalaman, candidateId)
+    values
+    ('${candidate.pengalaman[0]}', 1),
+    ('${candidate.pengalaman[1]}', 1)
   `);
 };

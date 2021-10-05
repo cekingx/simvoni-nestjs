@@ -104,25 +104,26 @@ export class EthereumElectionService {
     this.accountService.unlockAccount(sender, senderPassword);
 
     try {
+      const logger = this.logger;
       const receipt = await contract.methods
         .vote(name_slug)
         .send({ from: sender, gas: '0xdbba0' })
         .on('error', function (error) {
-          console.log('[StartErr] ' + error);
+          logger.error('[StartErr] ' + error);
         })
         .on('transactionHash', function (transactionHash) {
-          console.log('[startTrxHash] ' + transactionHash);
+          logger.log('[startTrxHash] ' + transactionHash);
         })
         .on('receipt', function (receipt) {
-          console.log('[startReceipt] ' + receipt); // contains the new contract address
+          logger.log('[startReceipt] ' + receipt); // contains the new contract address
         })
         .on('confirmation', function (confirmationNumber, receipt) {
-          console.log('[startConfirmation] ' + confirmationNumber, receipt);
+          logger.debug('[startConfirmation] ' + confirmationNumber, receipt);
         });
 
       return receipt;
     } catch (error) {
-      console.log('[VoteErr ]' + error);
+      this.logger.error('[VoteErr ]' + error);
     }
   }
 

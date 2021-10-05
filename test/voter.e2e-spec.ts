@@ -25,6 +25,7 @@ import {
   availableElection,
   followedElection,
   endedElection,
+  populateCandidate,
 } from './shared';
 import { ErrorResponseService } from '../src/helper/error-response/error-response.service';
 
@@ -109,6 +110,7 @@ describe('VoterController (e2e)', () => {
     await clearDb(connection);
     await populateUser(connection);
     await populateElection(connection);
+    await populateCandidate(connection);
   });
 
   describe('POST /voter/join/:id', () => {
@@ -205,19 +207,86 @@ describe('VoterController (e2e)', () => {
 
   describe('GET /voter/election-detail/:id', () => {
     it('Get Election Detail', async () => {
-      return;
+      const { body } = await request(app.getHttpServer())
+        .get('/voter/election-detail/2')
+        .expect(200);
+
+      expect(body.data).toMatchObject({
+        id: followedElection.id,
+        name: followedElection.name,
+        description: followedElection.description,
+        start: followedElection.start,
+        end: followedElection.end,
+        status: 'started',
+        ea: electionAuthority.name,
+        participation_status: 'waiting_approval',
+        candidates: [
+          {
+            id: expect.any(Number),
+            name: candidate.name,
+            visi: candidate.visi,
+            misi: candidate.misi,
+            pengalaman: candidate.pengalaman,
+          },
+        ],
+      });
     });
   });
 
   describe('POST /voter/vote', () => {
     it('Vote on Election', async () => {
-      return;
+      await request(app.getHttpServer()).post('/super-admin/deploy-election/2');
+      await request(app.getHttpServer()).post(
+        '/election-authority/start-election/2',
+      );
+
+      await request(app.getHttpServer())
+        .post('/voter/vote')
+        .send({
+          election_id: 2,
+          candidate_id: 1,
+        })
+        .expect(201);
+
+      const dbData = await connection.query(
+        `select * from election_participant where id=1`,
+      );
+
+      expect(dbData[0].statusId).toEqual(3);
     });
   });
 
+  // [] end election
   describe('GET /voter/ended-election-detail/:id', () => {
     it('Get Ended Election Detail', async () => {
-      return;
+      await request(app.getHttpServer()).post(
+        '/election-authority/end-election/2',
+      );
+
+      const { body } = await request(app.getHttpServer())
+        .get('/voter/ended-election-detail/2')
+        .expect(200);
+
+      expect(body.data).toMatchObject({
+        id: followedElection.id,
+        name: followedElection.name,
+        description: followedElection.description,
+        start: followedElection.start,
+        end: followedElection.end,
+        status: 'ended',
+        ea: electionAuthority.name,
+        winner: candidate.name,
+        candidates: [
+          {
+            id: expect.any(Number),
+            name: candidate.name,
+            visi: candidate.visi,
+            vote_count: 1,
+            misi: candidate.misi,
+            pengalaman: candidate.pengalaman,
+          },
+        ],
+      });
     });
   });
 
