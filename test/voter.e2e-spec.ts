@@ -15,10 +15,8 @@ import { CustomLogger } from '../src/logger/logger.service';
 import { UsersModule } from '../src/users/users.module';
 import { Connection } from 'typeorm';
 import {
-  superAdmin,
   electionAuthority,
   voter,
-  election,
   candidate,
   clearDb,
   populateUser,

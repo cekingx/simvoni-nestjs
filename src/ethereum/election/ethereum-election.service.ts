@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CustomLogger } from '../../logger/logger.service';
 import web3 from 'web3';
 import { AccountService } from '../account/account.service';
