@@ -13,67 +13,14 @@ import { AuthModule } from '../src/auth/auth.module';
 import { Connection } from 'typeorm';
 import { CustomLogger } from '../src/logger/logger.service';
 import { LoggerModule } from '../src/logger/logger.module';
-
-const superAdmin = {
-  name: 'Super Admin',
-  username: 'super-admin',
-  password: '$2b$10$8nfQAClO146d6qtN/GeCWu9hC62XiIvXp.lbG.Y8WE4WoN57GDxMW',
-  walletAddress: '0x00b108e445c6fb0e38ef3a7d4ba5b4f934471236',
-  userRoleId: '1',
-};
-
-const ea = {
-  name: 'Election Authority',
-  username: 'election-authority',
-  password: 'password',
-};
-
-const election = {
-  name: 'Pemira HMTI',
-  description: 'Pemilihan Ketua HMTI',
-  start: '2020-08-18',
-  end: '2020-08-20',
-  ea: 2,
-  status: 2,
-};
-
-const candidates = [
-  {
-    name: 'Candidate 1',
-    visi: 'Visi 1',
-    electionId: 1,
-    nameSlug: 'candidate-1',
-  },
-  {
-    name: 'Candidate 2',
-    visi: 'Visi 2',
-    electionId: 1,
-    nameSlug: 'candidate-2',
-  },
-];
+import { candidates, clearDb, eaDto, election, superAdmin } from './shared';
 
 global.console.warn = jest.fn();
 describe('SuperAdminController (e2e)', () => {
   let app: INestApplication;
   let connection: Connection;
 
-  const clearDb = async () => {
-    await connection.query('delete from election_participant');
-    await connection.query(
-      'alter table election_participant auto_increment = 1',
-    );
-    await connection.query('DELETE from misi');
-    await connection.query('ALTER TABLE misi AUTO_INCREMENT = 1');
-    await connection.query('DELETE from pengalaman');
-    await connection.query('ALTER TABLE pengalaman AUTO_INCREMENT = 1');
-    await connection.query('DELETE from candidate');
-    await connection.query('ALTER TABLE candidate AUTO_INCREMENT = 1');
-    await connection.query('DELETE from election');
-    await connection.query('ALTER TABLE election AUTO_INCREMENT = 1');
-    await connection.query('DELETE from user');
-    await connection.query('ALTER TABLE user AUTO_INCREMENT = 1');
-  };
-  const populateDb = async () => {
+  const populateDb = async (connection: Connection) => {
     await connection.query(`
       insert into user
       (name, username, password, walletAddress, userRoleId)
@@ -130,22 +77,22 @@ describe('SuperAdminController (e2e)', () => {
     connection = moduleFixture.get('Connection');
     app = moduleFixture.createNestApplication();
     await app.init();
-    await clearDb();
-    await populateDb();
+    await clearDb(connection);
+    await populateDb(connection);
   });
 
   describe('POST /super-admin/election-authority', () => {
     it('Create Election Authority', async () => {
       await request(app.getHttpServer())
         .post('/super-admin/election-authority')
-        .send(ea)
+        .send(eaDto)
         .expect(201);
 
       const dbData = await connection.query(
-        `SELECT * from user where username='${ea.username}'`,
+        `SELECT * from user where username='${eaDto.username}'`,
       );
 
-      expect(dbData[0].username).toEqual(ea.username);
+      expect(dbData[0].username).toEqual(eaDto.username);
     });
   });
 
@@ -158,8 +105,8 @@ describe('SuperAdminController (e2e)', () => {
       expect(body.data).toMatchObject([
         {
           id: 2,
-          name: ea.name,
-          username: ea.username,
+          name: eaDto.name,
+          username: eaDto.username,
           role: 'election_authority',
         },
       ]);
@@ -174,8 +121,8 @@ describe('SuperAdminController (e2e)', () => {
 
       expect(body.data).toMatchObject({
         id: 2,
-        name: ea.name,
-        username: ea.username,
+        name: eaDto.name,
+        username: eaDto.username,
         role: 'election_authority',
       });
     });
@@ -194,7 +141,7 @@ describe('SuperAdminController (e2e)', () => {
         .expect(201);
 
       const dbData = await connection.query(
-        `SELECT * from user where username='${ea.username}'`,
+        `SELECT * from user where username='${eaDto.username}'`,
       );
 
       expect(body.data).toMatchObject({
@@ -225,7 +172,7 @@ describe('SuperAdminController (e2e)', () => {
           start: election.start,
           end: election.end,
           status: 'ready_to_deploy',
-          ea: ea.username,
+          ea: eaDto.username,
         },
       ]);
     });

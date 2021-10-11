@@ -16,6 +16,12 @@ export const electionAuthority = {
   userRoleId: '2',
 };
 
+export const eaDto = {
+  name: electionAuthority.name,
+  username: electionAuthority.username,
+  password: electionAuthority.password,
+};
+
 export const voter = {
   id: 3,
   name: 'Voter',
@@ -73,6 +79,29 @@ export const candidate = {
   misi: ['misi', 'misi'],
   pengalaman: ['pengalaman', 'pengalaman'],
 };
+
+export const candidates = [
+  {
+    id: 1,
+    name: 'Candidate One',
+    nameSlug: 'candidate-one',
+    visi: 'visi',
+    election: 'Election',
+    misi: ['misi', 'misi'],
+    pengalaman: ['pengalaman', 'pengalaman'],
+    electionId: 1,
+  },
+  {
+    id: 2,
+    name: 'Candidate Two',
+    nameSlug: 'candidate-two',
+    visi: 'visi',
+    election: 'Election',
+    misi: ['misi', 'misi'],
+    pengalaman: ['pengalaman', 'pengalaman'],
+    electionId: 1,
+  },
+];
 
 export const clearDb = async (connection: Connection) => {
   await connection.query('delete from election_participant');

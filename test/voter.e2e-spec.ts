@@ -254,7 +254,6 @@ describe('VoterController (e2e)', () => {
     });
   });
 
-  // [] end election
   describe('GET /voter/ended-election-detail/:id', () => {
     it('Get Ended Election Detail', async () => {
       await request(app.getHttpServer()).post(
