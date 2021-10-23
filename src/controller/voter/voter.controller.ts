@@ -128,7 +128,9 @@ export class VoterController {
 
       return {
         message: 'Sukses Memberikan Suara',
-        data: receipt,
+        data: {
+          election: election.name,
+        },
       };
     } catch (error) {
       console.log(error);
