@@ -55,7 +55,7 @@ export class SuperAdminController {
     });
 
     return {
-      message: 'Success',
+      message: 'Sukses',
       data: users,
     };
   }
@@ -78,7 +78,7 @@ export class SuperAdminController {
       };
 
       return {
-        message: 'Success',
+        message: 'Sukses',
         data: user,
       };
     } catch (error) {
@@ -100,7 +100,7 @@ export class SuperAdminController {
     };
 
     return {
-      message: 'Success',
+      message: 'Sukses Membuat Election Authority',
       data: eaDto,
     };
   }
@@ -125,7 +125,7 @@ export class SuperAdminController {
     });
 
     return {
-      message: 'Success',
+      message: 'Sukses Set Address',
       data: {
         address: await addressResolver,
       },
@@ -153,7 +153,7 @@ export class SuperAdminController {
     });
 
     return {
-      message: 'Success',
+      message: 'Sukses',
       data: electionDtos,
     };
   }
@@ -224,7 +224,7 @@ export class SuperAdminController {
     }
 
     return {
-      message: 'Success',
+      message: 'Sukses Deploy Pemilihan',
       data: {
         address: contractAddress,
       },
@@ -240,7 +240,7 @@ export class SuperAdminController {
     );
 
     return {
-      message: 'Success',
+      message: 'Sukses',
       data: numCandidate,
     };
   }

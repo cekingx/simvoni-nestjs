@@ -135,7 +135,7 @@ export class ElectionAuthorityController {
     };
 
     return {
-      message: 'Success',
+      message: 'Sukses Membuat Pemilihan',
       data: electionDto,
     };
   }
@@ -158,7 +158,7 @@ export class ElectionAuthorityController {
         electionId,
       );
       return {
-        message: 'Success',
+        message: 'Sukses Menambahkan Kandidat',
         data: candidate,
       };
     }
@@ -247,7 +247,7 @@ export class ElectionAuthorityController {
     };
 
     return {
-      message: 'Success',
+      message: 'Sukses',
       data: electionParticipantDto,
     };
   }
@@ -317,8 +317,10 @@ export class ElectionAuthorityController {
     await this.electionService.updateElectionStatus(election, 4);
 
     return {
-      message: 'Success',
-      data: receipt,
+      message: 'Sukses Memulai Pemilihan',
+      data: {
+        election: election.name,
+      },
     };
   }
 
@@ -358,8 +360,10 @@ export class ElectionAuthorityController {
     await this.electionService.updateElectionStatus(election, 5);
 
     return {
-      message: 'Success',
-      data: receipt,
+      message: 'Sukses Menghentikan Pemilihan',
+      data: {
+        election: election.name,
+      },
     };
   }
 }

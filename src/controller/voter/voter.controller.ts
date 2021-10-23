@@ -70,7 +70,7 @@ export class VoterController {
     };
 
     return {
-      message: 'Success',
+      message: 'Sukses',
       data: userParticipationDto,
     };
   }
@@ -127,7 +127,7 @@ export class VoterController {
       );
 
       return {
-        message: 'Success',
+        message: 'Sukses Memberikan Suara',
         data: receipt,
       };
     } catch (error) {
@@ -159,7 +159,7 @@ export class VoterController {
     });
 
     return {
-      message: 'Success',
+      message: 'Sukses',
       data: availableElectionDto,
     };
   }
@@ -196,7 +196,7 @@ export class VoterController {
     });
 
     return {
-      message: 'Success',
+      message: 'Sukses',
       data: followedElectionDto,
     };
   }
@@ -221,7 +221,7 @@ export class VoterController {
     });
 
     return {
-      message: 'Oke',
+      message: 'Sukses',
       data: endedElectionDto,
     };
   }
@@ -281,7 +281,7 @@ export class VoterController {
     };
 
     return {
-      message: 'Success',
+      message: 'Sukses',
       data: electionDto,
     };
   }
@@ -351,7 +351,7 @@ export class VoterController {
     };
 
     return {
-      message: 'Success',
+      message: 'Sukses',
       data: endedElectionDto,
     };
   }
@@ -378,7 +378,7 @@ export class VoterController {
     };
 
     return {
-      message: 'Success',
+      message: 'Sukses Mengikuti Pemilihan',
       data: electionDto,
     };
   }
