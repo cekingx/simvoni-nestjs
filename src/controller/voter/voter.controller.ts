@@ -384,4 +384,16 @@ export class VoterController {
       data: electionDto,
     };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('upgrade-role')
+  async upgradeRole(@Request() req) {
+    const username = req.user.username;
+
+    await this.userService.requestUpgradeRole(username);
+
+    return {
+      message: 'Permintaan Sedang Diproses',
+    };
+  }
 }
