@@ -13,7 +13,14 @@ import { AuthModule } from '../src/auth/auth.module';
 import { Connection } from 'typeorm';
 import { CustomLogger } from '../src/logger/logger.service';
 import { LoggerModule } from '../src/logger/logger.module';
-import { candidates, clearDb, eaDto, election, superAdmin } from './shared';
+import {
+  candidates,
+  clearDb,
+  eaDto,
+  election,
+  superAdmin,
+  voter,
+} from './shared';
 
 global.console.warn = jest.fn();
 describe('SuperAdminController (e2e)', () => {
@@ -25,7 +32,15 @@ describe('SuperAdminController (e2e)', () => {
       insert into user
       (name, username, password, walletAddress, userRoleId)
       values
-      ('${superAdmin.name}', '${superAdmin.username}', '${superAdmin.password}', '${superAdmin.walletAddress}', '${superAdmin.userRoleId}')
+      ('${superAdmin.name}', '${superAdmin.username}', '${superAdmin.password}', '${superAdmin.walletAddress}', '${superAdmin.userRoleId}'),
+      ('${voter.name}', '${voter.username}', '${voter.password}', '${voter.walletAddress}', '${voter.userRoleId}')
+    `);
+
+    await connection.query(`
+      insert into upgrade_role
+      (userId, isUpgraded)
+      values
+      (2, false)
     `);
   };
 
@@ -104,7 +119,7 @@ describe('SuperAdminController (e2e)', () => {
 
       expect(body.data).toMatchObject([
         {
-          id: 2,
+          id: 3,
           name: eaDto.name,
           username: eaDto.username,
           role: 'election_authority',
@@ -114,30 +129,30 @@ describe('SuperAdminController (e2e)', () => {
   });
 
   describe('GET /super-admin/election-authority/:id', () => {
-    it('Found EA with id 2', async () => {
+    it('Found EA with id 3', async () => {
       const { body } = await request(app.getHttpServer())
-        .get('/super-admin/election-authority/2')
+        .get('/super-admin/election-authority/3')
         .expect(200);
 
       expect(body.data).toMatchObject({
-        id: 2,
+        id: 3,
         name: eaDto.name,
         username: eaDto.username,
         role: 'election_authority',
       });
     });
 
-    it('Not found EA with id 3', async () => {
+    it('Not found EA with id 4', async () => {
       await request(app.getHttpServer())
-        .get('/super-admin/election-authority/3')
+        .get('/super-admin/election-authority/4')
         .expect(404);
     });
   });
 
   describe('POST /super-admin/election-authority/set-wallet-address/id', () => {
-    it('Create Address for user with id 1', async () => {
+    it('Create Address for user with id 3', async () => {
       const { body } = await request(app.getHttpServer())
-        .post('/super-admin/election-authority/set-wallet-address/2')
+        .post('/super-admin/election-authority/set-wallet-address/3')
         .expect(201);
 
       const dbData = await connection.query(
@@ -195,6 +210,27 @@ describe('SuperAdminController (e2e)', () => {
       expect(body.data).toMatchObject({
         address: expect.any(String),
       });
+    });
+  });
+
+  describe('GET /super-admin/upgrade-role', () => {
+    it('Get upgrade role request', async () => {
+      const { body } = await request(app.getHttpServer())
+        .get('/super-admin/upgrade-role')
+        .expect(200);
+
+      expect(body.data).toMatchObject([
+        {
+          id: expect.any(Number),
+          isUpgraded: false,
+          user: {
+            id: expect.any(Number),
+            name: voter.name,
+            password: voter.password,
+            username: voter.username,
+          },
+        },
+      ]);
     });
   });
 

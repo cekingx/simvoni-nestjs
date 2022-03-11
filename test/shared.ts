@@ -37,7 +37,7 @@ export const election = {
   start: '2021-09-22',
   end: '2021-09-23',
   status: 2,
-  ea: 2,
+  ea: 3,
 };
 
 export const availableElection = {
@@ -104,6 +104,8 @@ export const candidates = [
 ];
 
 export const clearDb = async (connection: Connection) => {
+  await connection.query('delete from upgrade_role');
+  await connection.query('alter table upgrade_role auto_increment = 1');
   await connection.query('delete from election_participant');
   await connection.query('alter table election_participant auto_increment = 1');
   await connection.query('DELETE from misi');

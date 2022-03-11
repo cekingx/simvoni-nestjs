@@ -287,6 +287,18 @@ describe('VoterController (e2e)', () => {
     });
   });
 
+  describe('POST /voter/upgrade-role', () => {
+    it('Request Upgrade Role', async () => {
+      const { body } = await request(app.getHttpServer())
+        .post('/voter/upgrade-role')
+        .expect(201);
+
+      expect(body).toMatchObject({
+        message: expect.any(String),
+      });
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });
