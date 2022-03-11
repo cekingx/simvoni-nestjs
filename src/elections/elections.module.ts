@@ -11,6 +11,7 @@ import { ElectionParticipant } from './entity/election-participant.entity';
 import { ParticipationStatus } from './entity/participation-status.entity';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/user-role.entity';
+import { UpgradeRole } from '../users/upgrade-role.entity';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UserRole } from '../users/user-role.entity';
       ParticipationStatus,
       User,
       UserRole,
+      UpgradeRole,
     ]),
   ],
   providers: [ElectionService, UsersService],

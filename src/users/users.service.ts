@@ -6,6 +6,7 @@ import { UserRole } from './user-role.entity';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { CreateEaDto } from './create-ea.dto';
+import { UpgradeRole } from './upgrade-role.entity';
 
 @Injectable()
 export class UsersService {
@@ -14,6 +15,8 @@ export class UsersService {
     private userRepository: Repository<User>,
     @InjectRepository(UserRole)
     private userRoleRepository: Repository<UserRole>,
+    @InjectRepository(UpgradeRole)
+    private upgradeRoleRepository: Repository<UpgradeRole>,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -84,5 +87,43 @@ export class UsersService {
   hashPassword(password: string): Promise<string> {
     const saltOrRound = 10;
     return bcrypt.hash(password, saltOrRound);
+  }
+
+  async requestUpgradeRole(username: string) {
+    const user = await this.findOne(username);
+    const upgrade = new UpgradeRole();
+    upgrade.user = user;
+    upgrade.isUpgraded = false;
+    return this.upgradeRoleRepository.save(upgrade);
+  }
+
+  async getUpgradeRole() {
+    return this.upgradeRoleRepository
+      .createQueryBuilder('upgrade')
+      .innerJoinAndSelect('upgrade.user', 'user')
+      .where('upgrade.isUpgraded = false')
+      .getMany();
+  }
+
+  async upgradeRole(id: number) {
+    const upgrade = await this.upgradeRoleRepository
+      .createQueryBuilder('upgrade')
+      .where('upgrade.id = :id', { id })
+      .getOne();
+
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.id = :id', { id: upgrade.user.id })
+      .getOne();
+
+    const role = await this.userRoleRepository
+      .createQueryBuilder('role')
+      .where('role.role = :role', { role: 'election_authority' })
+      .getOne();
+
+    user.userRole = role;
+    await this.userRepository.save(user);
+    upgrade.isUpgraded = true;
+    await this.upgradeRoleRepository.save(upgrade);
   }
 }
