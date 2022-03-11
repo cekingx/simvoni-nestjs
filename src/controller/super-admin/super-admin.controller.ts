@@ -244,4 +244,25 @@ export class SuperAdminController {
       data: numCandidate,
     };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('upgrade-role')
+  async getUpgradeRequest() {
+    const result = await this.userService.getUpgradeRole();
+
+    return {
+      message: 'Sukses',
+      data: result,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('upgrade-role/:id')
+  async upgradeUserRole(@Param('id') id: number) {
+    await this.userService.upgradeRole(id);
+
+    return {
+      message: 'Sukses upgrade role',
+    };
+  }
 }
