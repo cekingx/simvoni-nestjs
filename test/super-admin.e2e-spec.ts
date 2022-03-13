@@ -234,6 +234,18 @@ describe('SuperAdminController (e2e)', () => {
     });
   });
 
+  describe('POST /super-admin/upgrade-role/1', () => {
+    it('Upgrade role for upgrade request 1', async () => {
+      const { body } = await request(app.getHttpServer())
+        .post('/super-admin/upgrade-role/1')
+        .expect(201);
+
+      const dbData = await connection.query(`SELECT * from user where id = 2`);
+
+      expect(dbData[0].role).toEqual(2);
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });
