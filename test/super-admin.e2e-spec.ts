@@ -236,7 +236,7 @@ describe('SuperAdminController (e2e)', () => {
 
   describe('POST /super-admin/upgrade-role/1', () => {
     it('Upgrade role for upgrade request 1', async () => {
-      const { body } = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post('/super-admin/upgrade-role/1')
         .expect(201);
 
