@@ -299,6 +299,18 @@ describe('VoterController (e2e)', () => {
     });
   });
 
+  describe('GET /voter/upgrade-role/status', () => {
+    it('Get Upgrade Role Status', async () => {
+      const { body } = await request(app.getHttpServer())
+        .get('/voter/upgrade-role/status')
+        .expect(200);
+
+      expect(body).toMatchObject({
+        message: 'Sedang Direview',
+      });
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });

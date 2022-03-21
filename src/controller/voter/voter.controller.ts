@@ -396,4 +396,16 @@ export class VoterController {
       message: 'Permintaan Sedang Diproses',
     };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('upgrade-role/status')
+  async upgradeRoleStatus(@Request() req) {
+    const username = req.user.username;
+
+    const message = await this.userService.upgradeRoleStatus(username);
+
+    return {
+      message,
+    };
+  }
 }

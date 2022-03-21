@@ -23,7 +23,7 @@ export class UsersService {
     const user = new User();
     const role = await this.userRoleRepository
       .createQueryBuilder('user_role')
-      .where('user_role.role = :role', { role: createUserDto.role })
+      .where('user_role.role = :role', { role: 'voter' })
       .getOne();
 
     user.name = createUserDto.name;
@@ -125,5 +125,29 @@ export class UsersService {
     await this.userRepository.save(user);
     upgrade.isUpgraded = true;
     await this.upgradeRoleRepository.save(upgrade);
+  }
+
+  async upgradeRoleStatus(username: string) {
+    const user = await this.findOne(username);
+
+    const upgrade = await this.upgradeRoleRepository
+      .createQueryBuilder('upgrade')
+      .innerJoinAndSelect('upgrade.user', 'user')
+      .where('user.id = :id', { id: user.id })
+      .getOne();
+
+    if (!upgrade) {
+      return 'Tidak Ditemukan';
+    }
+
+    if (!upgrade.isUpgraded) {
+      return 'Sedang Direview';
+    }
+
+    if (upgrade.isUpgraded) {
+      return 'Telah Diupgrade';
+    }
+
+    return 'Tidak Ditemukan';
   }
 }
