@@ -402,10 +402,13 @@ export class VoterController {
   async upgradeRoleStatus(@Request() req) {
     const username = req.user.username;
 
-    const message = await this.userService.upgradeRoleStatus(username);
+    const { code, value } = await this.userService.upgradeRoleStatus(username);
 
     return {
-      message,
+      data: {
+        code,
+        value,
+      },
     };
   }
 }

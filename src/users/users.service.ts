@@ -137,17 +137,29 @@ export class UsersService {
       .getOne();
 
     if (!upgrade) {
-      return 'Tidak Ditemukan';
+      return {
+        code: 0,
+        value: 'Tidak Ditemukan',
+      };
     }
 
     if (!upgrade.isUpgraded) {
-      return 'Sedang Direview';
+      return {
+        code: 1,
+        value: 'Sedang Direview',
+      };
     }
 
     if (upgrade.isUpgraded) {
-      return 'Telah Diupgrade';
+      return {
+        code: 2,
+        value: 'Telah Diupgrade',
+      };
     }
 
-    return 'Tidak Ditemukan';
+    return {
+      code: 0,
+      value: 'Tidak Ditemukan',
+    };
   }
 }

@@ -306,7 +306,10 @@ describe('VoterController (e2e)', () => {
         .expect(200);
 
       expect(body).toMatchObject({
-        message: 'Sedang Direview',
+        data: {
+          code: 1,
+          value: 'Sedang Direview',
+        },
       });
     });
   });
