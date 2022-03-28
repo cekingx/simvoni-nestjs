@@ -108,6 +108,7 @@ export class UsersService {
   async upgradeRole(id: number) {
     const upgrade = await this.upgradeRoleRepository
       .createQueryBuilder('upgrade')
+      .innerJoinAndSelect('upgrade.user', 'user')
       .where('upgrade.id = :id', { id })
       .getOne();
 
