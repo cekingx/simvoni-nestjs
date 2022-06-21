@@ -3,6 +3,8 @@ import { CustomLogger } from '../../logger/logger.service';
 import web3 from 'web3';
 import { AccountService } from '../account/account.service';
 import * as contractFile from './BallotContract.json';
+import * as electionAbi from './Election.json';
+import { ContractFactory, ethers, Wallet } from 'ethers';
 
 @Injectable()
 export class EthereumElectionService {
@@ -24,6 +26,26 @@ export class EthereumElectionService {
     return data;
   }
 
+  async deployNewContract() {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545/',
+    );
+    const deployer = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const factory = new ContractFactory(
+      electionAbi.abi,
+      electionAbi.bytecode,
+      deployer.connect(provider),
+    );
+
+    const contract = await factory.deploy('Pemira HMTI', [1]);
+    await contract.deployTransaction.wait();
+
+    return contract.address;
+  }
+
+  /**
+   * @deprecated
+   */
   async deployContract(sender: string, senderPassword: string): Promise<any> {
     this.accountService.unlockAccount(sender, senderPassword);
 

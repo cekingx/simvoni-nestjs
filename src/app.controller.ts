@@ -24,6 +24,7 @@ export class AppController {
     private authService: AuthService,
     private userService: UsersService,
     private walletService: WalletService,
+    private ethereumElectionService: EthereumElectionService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -68,6 +69,15 @@ export class AppController {
   @Get('send-ether')
   async sendEther() {
     const result = await this.walletService.sendEtherFromFaucet('0x70997970C51812dc3A010C7d01b50e0d17dc79C8', '0.1');
+
+    return {
+      data: result,
+    };
+  }
+
+  @Get('deploy-contract')
+  async deployContract() {
+    const result = await this.ethereumElectionService.deployNewContract();
 
     return {
       data: result,
