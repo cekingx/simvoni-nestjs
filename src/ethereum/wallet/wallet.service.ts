@@ -23,6 +23,22 @@ export class WalletService {
     return result;
   }
 
+  async sendEtherFromFaucet(destination: string, amount: string) {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545/',
+    );
+    const faucet = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const result = await faucet.connect(provider).sendTransaction({
+      to: destination,
+      value: utils.parseEther(amount),
+    });
+
+    return result;
+  }
+
+  /**
+   * @deprecated
+   */
   createAccount(password: string): Observable<any> {
     return this.http
       .post(process.env.ETH_ENDPOINT, {
@@ -56,19 +72,6 @@ export class WalletService {
     });
   }
 
-  async sendEtherFromFaucet(destination: string, amount: string) {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545/',
-    );
-    const faucet = new Wallet(process.env.FAUCET_PRIVATE_KEY);
-    const result = await faucet.connect(provider).sendTransaction({
-      to: destination,
-      value: utils.parseEther(amount),
-    });
-
-    return result;
-  }
-
   /**
    * @deprecated
    */
@@ -92,6 +95,9 @@ export class WalletService {
     });
   }
 
+  /**
+   * @deprecated
+   */
   getContractMethods(contractAddress: string, method: string, param?: string) {
     const contract: any = this.ethereumElectionService.connectToContract(
       contractAddress,
@@ -114,6 +120,9 @@ export class WalletService {
     }
   }
 
+  /**
+   * @deprecated
+   */
   async sendEtherForMethods(
     contractMethods: any,
     receiver: string,
