@@ -64,4 +64,13 @@ export class AppController {
       data: result,
     };
   }
+
+  @Get('send-ether')
+  async sendEther() {
+    const result = await this.walletService.sendEtherFromFaucet('0x70997970C51812dc3A010C7d01b50e0d17dc79C8', '0.1');
+
+    return {
+      data: result,
+    };
+  }
 }
