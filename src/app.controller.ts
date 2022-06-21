@@ -23,6 +23,7 @@ export class AppController {
   constructor(
     private authService: AuthService,
     private userService: UsersService,
+    private walletService: WalletService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -46,11 +47,21 @@ export class AppController {
   @Post('register')
   async registerNewUser(@Body() createUserDto: CreateUserDto)
   {
-    const { password, walletAddress, randomSeed, ...rest } = await this.userService.create(createUserDto);
+    const { password, walletAddress, privateKey, ...rest } = await this.userService.create(createUserDto);
 
     return {
       message: 'Success',
       data: rest
     }
+  }
+
+  @Get('new-account')
+  async newAccount() {
+    const result = this.walletService.newAccount();
+
+    return {
+      message: 'Success',
+      data: result,
+    };
   }
 }

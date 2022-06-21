@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
+import { Wallet } from 'ethers';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import Web3 from 'web3';
@@ -15,6 +16,12 @@ export class WalletService {
     private accountService: AccountService,
     private http: HttpService,
   ) {}
+
+  newAccount(): Wallet {
+    const result = Wallet.createRandom();
+    console.log(result.privateKey);
+    return result;
+  }
 
   createAccount(password: string): Observable<any> {
     return this.http

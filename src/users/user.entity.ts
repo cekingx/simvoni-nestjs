@@ -1,4 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { deprecate } from 'util';
 import { UserRole } from './user-role.entity';
 
 @Entity()
@@ -25,7 +26,7 @@ export class User {
   @Column({
     nullable: true,
   })
-  randomSeed: string;
+  privateKey: string;
 
   @ManyToOne(() => UserRole, (userRole) => userRole.role)
   userRole: UserRole;

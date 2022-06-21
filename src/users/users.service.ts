@@ -7,6 +7,7 @@ import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { CreateEaDto } from './create-ea.dto';
 import { UpgradeRole } from './upgrade-role.entity';
+import { Wallet } from 'ethers';
 
 @Injectable()
 export class UsersService {
@@ -25,10 +26,13 @@ export class UsersService {
       .createQueryBuilder('user_role')
       .where('user_role.role = :role', { role: 'voter' })
       .getOne();
+    const wallet = Wallet.createRandom();
 
     user.name = createUserDto.name;
     user.username = createUserDto.username;
     user.userRole = role;
+    user.walletAddress = wallet.address;
+    user.privateKey = wallet.privateKey;
 
     user.password = await this.hashPassword(createUserDto.password);
 
@@ -41,10 +45,13 @@ export class UsersService {
       .createQueryBuilder('user_role')
       .where("user_role.role = 'election_authority'")
       .getOne();
+    const wallet = Wallet.createRandom();
 
     user.name = createEaDto.name;
     user.username = createEaDto.username;
     user.userRole = role;
+    user.walletAddress = wallet.address;
+    user.privateKey = wallet.privateKey;
 
     user.password = await this.hashPassword(createEaDto.password);
 
