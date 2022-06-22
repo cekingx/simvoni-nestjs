@@ -83,4 +83,14 @@ export class AppController {
       data: result,
     };
   }
+
+  @Get('add-candidate')
+  async addCandidate() {
+    const address = await this.ethereumElectionService.deployNewContract();
+    const result = await this.ethereumElectionService.addCandidate(address);
+
+    return {
+      data: result,
+    };
+  }
 }
