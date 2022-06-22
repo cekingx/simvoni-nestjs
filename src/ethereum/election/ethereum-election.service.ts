@@ -4,7 +4,7 @@ import web3 from 'web3';
 import { AccountService } from '../account/account.service';
 import * as contractFile from './BallotContract.json';
 import * as electionAbi from './Election.json';
-import { Contract, ContractFactory, ethers, Wallet } from 'ethers';
+import { Contract, ContractFactory, ethers, utils, Wallet } from 'ethers';
 
 @Injectable()
 export class EthereumElectionService {
@@ -56,6 +56,23 @@ export class EthereumElectionService {
 
     const tx = await contract.addCandidate('dirga');
     return tx.wait();
+  }
+
+  async estimate(address: string) {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545',
+    );
+    const signer = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const contract = new Contract(
+      address,
+      electionAbi.abi,
+      signer.connect(provider),
+    );
+
+    const gasPrice = await provider.getGasPrice();
+    console.log(gasPrice);
+    const result = await contract.estimateGas.addCandidate('dirga');
+    return result.mul(gasPrice).toString();
   }
 
   /**

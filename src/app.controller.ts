@@ -93,4 +93,14 @@ export class AppController {
       data: result,
     };
   }
+
+  @Get('estimate-gas')
+  async estimateGas() {
+    const address = await this.ethereumElectionService.deployNewContract();
+    const result = await this.ethereumElectionService.estimate(address);
+
+    return {
+      data: result,
+    };
+  }
 }
