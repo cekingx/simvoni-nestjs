@@ -103,4 +103,17 @@ export class AppController {
       data: result,
     };
   }
+
+  @Get('abstain')
+  async abstain() {
+    const address = await this.ethereumElectionService.deployNewContract();
+    await this.ethereumElectionService.addCandidate(address);
+    await this.ethereumElectionService.start(address);
+
+    const result = await this.ethereumElectionService.abstain(address);
+
+    return {
+      data: result,
+    };
+  }
 }
