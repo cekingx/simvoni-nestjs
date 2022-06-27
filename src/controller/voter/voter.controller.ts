@@ -144,7 +144,6 @@ export class VoterController {
     try {
       const username = req.user.username;
       const voter = await this.userService.findOne(username);
-      const superAdmin = await this.userService.findOne('super-admin');
       const voterParticipations: ElectionParticipant[] = await this.electionService.getUserParticipation(
         username,
       );
@@ -152,7 +151,11 @@ export class VoterController {
         (data: ElectionParticipant) => data.election.id == electionId,
       );
       const election = await this.electionService.getElectionById(electionId);
-      const candidate = await this.electionService.getCandidateById(electionId);
+
+      await this.ethereumElectionService.abstain(
+        election.contractAddress,
+        voter.privateKey,
+      );
 
       await this.electionService.updateParticipationStatus(
         voterParticipation.id,
@@ -160,7 +163,7 @@ export class VoterController {
       );
 
       return {
-        message: 'Sukses Memberikan Suara',
+        message: 'Sukses Memberikan Suara Abstain',
         data: {
           election: election.name,
         },
