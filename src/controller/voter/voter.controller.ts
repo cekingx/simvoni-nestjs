@@ -139,6 +139,39 @@ export class VoterController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('vote/:id/abstain')
+  async voteAbstain(@Request() req: any, @Param('id') electionId: number) {
+    try {
+      const username = req.user.username;
+      const voter = await this.userService.findOne(username);
+      const superAdmin = await this.userService.findOne('super-admin');
+      const voterParticipations: ElectionParticipant[] = await this.electionService.getUserParticipation(
+        username,
+      );
+      const voterParticipation = voterParticipations.find(
+        (data: ElectionParticipant) => data.election.id == electionId,
+      );
+      const election = await this.electionService.getElectionById(electionId);
+      const candidate = await this.electionService.getCandidateById(electionId);
+
+      await this.electionService.updateParticipationStatus(
+        voterParticipation.id,
+        ParticipationEnum.voted,
+      );
+
+      return {
+        message: 'Sukses Memberikan Suara',
+        data: {
+          election: election.name,
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('available-election')
   async getAvailableElection(@Request() req) {
     const availableElectionDto: ElectionDto[] = [];

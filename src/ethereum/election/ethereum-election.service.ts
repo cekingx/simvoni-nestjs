@@ -97,11 +97,11 @@ export class EthereumElectionService {
     return tx.wait();
   }
 
-  async abstain(address: string) {
+  async abstain(address: string, privateKey: string) {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://127.0.0.1:8545/',
     );
-    const wallet = Wallet.createRandom();
+    const wallet = new Wallet(privateKey);
     const contract = new Contract(address, electionAbi.abi);
 
     const gas = await this.estimate(address);

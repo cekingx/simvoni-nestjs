@@ -110,10 +110,10 @@ export class AppController {
     await this.ethereumElectionService.addCandidate(address);
     await this.ethereumElectionService.start(address);
 
-    const result = await this.ethereumElectionService.abstain(address);
+    // const result = await this.ethereumElectionService.abstain(address);
 
     return {
-      data: result,
+      data: '',
     };
   }
 }
