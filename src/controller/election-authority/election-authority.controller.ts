@@ -27,6 +27,7 @@ import { EthereumElectionService } from '../../ethereum/election/ethereum-electi
 import { UsersService } from '../../users/users.service';
 import { ElectionDetailDto } from '../../elections/dto/election-detail.dto';
 import { ElectionStatusEnum } from '../../helper/status';
+import { AddWeightDto } from 'src/elections/dto/add-weight.dto';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {
@@ -160,6 +161,32 @@ export class ElectionAuthorityController {
       return {
         message: 'Sukses Menambahkan Kandidat',
         data: candidate,
+      };
+    }
+
+    return false;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('add-weight/:electionId')
+  async addWeightToElection(
+    @Body() addWeightDto: AddWeightDto,
+    @Param('electionId') electionId: number,
+    @Request() req,
+  ) {
+    const isValidEa = this.electionService.validateEa(
+      req.user.username,
+      electionId,
+    );
+
+    if (isValidEa) {
+      const weight = await this.electionService.addWeight(
+        addWeightDto,
+        electionId,
+      );
+      return {
+        message: 'Sukses Menambahkan Weight',
+        data: weight,
       };
     }
 

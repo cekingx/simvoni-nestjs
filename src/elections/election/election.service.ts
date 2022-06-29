@@ -14,6 +14,8 @@ import { ParticipationStatus } from '../entity/participation-status.entity';
 import { ElectionDto } from '../dto/election.dto';
 import { UsersService } from '../../users/users.service';
 import { ElectionStatusEnum } from '../../helper/status';
+import { Weight } from '../entity/weight.entity';
+import { AddWeightDto } from '../dto/add-weight.dto';
 
 @Injectable()
 export class ElectionService {
@@ -41,6 +43,9 @@ export class ElectionService {
 
     @InjectRepository(ParticipationStatus)
     private participationStatusRepository: Repository<ParticipationStatus>,
+
+    @InjectRepository(Weight)
+    private weightRepository: Repository<Weight>,
 
     private userService: UsersService,
 
@@ -136,7 +141,6 @@ export class ElectionService {
     createElectionDto: CreateElectionDto,
     election_authority: string,
   ): Promise<Election> {
-    const election = new Election();
     const status = await this.electionStatusRepository
       .createQueryBuilder('election_status')
       .where("election_status.status = 'draft'")
@@ -146,6 +150,7 @@ export class ElectionService {
       .where('user.username = :username', { username: election_authority })
       .getOne();
 
+    const election = new Election();
     election.name = createElectionDto.name;
     election.description = createElectionDto.description;
     election.start = createElectionDto.start;
@@ -153,7 +158,16 @@ export class ElectionService {
     election.status = status;
     election.electionAuthority = ea;
 
-    return this.electionRepository.save(election);
+    const result = await this.electionRepository.save(election);
+
+    const weight = new Weight();
+    weight.name = 'default';
+    weight.weight = 1;
+    weight.election = election;
+
+    await this.weightRepository.save(weight);
+
+    return result;
   }
 
   async validateEa(username: string, electionId: number): Promise<boolean> {
@@ -233,6 +247,20 @@ export class ElectionService {
     }
 
     return savedCandidate;
+  }
+
+  async addWeight(addWeightDto: AddWeightDto, electionId: number) {
+    const election = await this.electionRepository
+      .createQueryBuilder('election')
+      .where('election.id = :id', { id: electionId })
+      .getOne();
+
+    const weight = new Weight();
+    weight.name = addWeightDto.name;
+    weight.weight = addWeightDto.weight;
+    weight.election = election;
+
+    return this.weightRepository.save(weight);
   }
 
   async updateElection(election: Election) {

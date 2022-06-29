@@ -12,6 +12,7 @@ import { ParticipationStatus } from './entity/participation-status.entity';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/user-role.entity';
 import { UpgradeRole } from '../users/upgrade-role.entity';
+import { Weight } from './entity/weight.entity';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UpgradeRole } from '../users/upgrade-role.entity';
       User,
       UserRole,
       UpgradeRole,
+      Weight,
     ]),
   ],
   providers: [ElectionService, UsersService],
