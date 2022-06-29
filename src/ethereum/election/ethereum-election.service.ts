@@ -3,6 +3,15 @@ import { CustomLogger } from '../../logger/logger.service';
 import web3 from 'web3';
 import { AccountService } from '../account/account.service';
 import * as contractFile from './BallotContract.json';
+import * as electionAbi from './Election.json';
+import {
+  BigNumberish,
+  Contract,
+  ContractFactory,
+  ethers,
+  utils,
+  Wallet,
+} from 'ethers';
 
 @Injectable()
 export class EthereumElectionService {
@@ -24,6 +33,100 @@ export class EthereumElectionService {
     return data;
   }
 
+  async deployNewContract() {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545/',
+    );
+    const deployer = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const factory = new ContractFactory(
+      electionAbi.abi,
+      electionAbi.bytecode,
+      deployer.connect(provider),
+    );
+
+    const contract = await factory.deploy('Pemira HMTI', [1]);
+    await contract.deployTransaction.wait();
+
+    return contract.address;
+  }
+
+  async addCandidate(address: string) {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545/',
+    );
+    const signer = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const contract = new Contract(
+      address,
+      electionAbi.abi,
+      signer.connect(provider),
+    );
+
+    const tx = await contract.addCandidate('dirga');
+    return tx.wait();
+  }
+
+  async estimate(address: string): Promise<BigNumberish> {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545',
+    );
+    const signer = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const contract = new Contract(
+      address,
+      electionAbi.abi,
+      signer.connect(provider),
+    );
+
+    const gasPrice = await provider.getGasPrice();
+    console.log(gasPrice);
+    const result = await contract.estimateGas.abstain();
+    return result.mul(gasPrice).mul(2);
+  }
+
+  async start(address: string) {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545/',
+    );
+    const signer = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const contract = new Contract(
+      address,
+      electionAbi.abi,
+      signer.connect(provider),
+    );
+
+    const tx = await contract.startElection();
+    return tx.wait();
+  }
+
+  async abstain(address: string, privateKey: string) {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545/',
+    );
+    const wallet = new Wallet(privateKey);
+    const contract = new Contract(address, electionAbi.abi);
+
+    const gas = await this.estimate(address);
+    console.log(gas.toString());
+    (await this.sendEtherFromFaucet(wallet.address, gas)).wait();
+    const tx = await contract.connect(wallet.connect(provider)).abstain();
+    return tx.wait();
+  }
+
+  async sendEtherFromFaucet(destination: string, amount: BigNumberish) {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545/',
+    );
+    const faucet = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const result = await faucet.connect(provider).sendTransaction({
+      to: destination,
+      value: amount,
+    });
+
+    return result;
+  }
+
+  /**
+   * @deprecated
+   */
   async deployContract(sender: string, senderPassword: string): Promise<any> {
     this.accountService.unlockAccount(sender, senderPassword);
 

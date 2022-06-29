@@ -47,7 +47,6 @@ export class SuperAdminController {
         name: user.name,
         username: user.username,
         walletAddress: user.walletAddress,
-        randomSeed: user.randomSeed,
         role: user.userRole.role,
       };
 
@@ -73,7 +72,6 @@ export class SuperAdminController {
         name: electionAuthority.name,
         username: electionAuthority.username,
         walletAddress: electionAuthority.walletAddress,
-        randomSeed: electionAuthority.randomSeed,
         role: electionAuthority.userRole.role,
       };
 
@@ -95,7 +93,6 @@ export class SuperAdminController {
       name: ea.name,
       username: ea.username,
       walletAddress: ea.walletAddress,
-      randomSeed: ea.randomSeed,
       role: ea.userRole.role,
     };
 
@@ -105,32 +102,32 @@ export class SuperAdminController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post('election-authority/set-wallet-address/:userId')
-  async setEaWalletAddress(@Param('userId') userId: number) {
-    const user: User = await this.userService.findElectionAuthorityById(userId);
-    const seed = randomString(10);
+  // @UseGuards(JwtAuthGuard)
+  // @Post('election-authority/set-wallet-address/:userId')
+  // async setEaWalletAddress(@Param('userId') userId: number) {
+  //   const user: User = await this.userService.findElectionAuthorityById(userId);
+  //   const seed = randomString(10);
 
-    const addressResolver = new Promise((resolve) => {
-      if (user.walletAddress == null && user.randomSeed == null) {
-        this.walletService.createAccount(seed).subscribe(async (response) => {
-          user.randomSeed = seed;
-          user.walletAddress = response.result;
-          await this.userService.updateUser(user);
-          resolve(response.result);
-        });
-      } else {
-        resolve(user.walletAddress);
-      }
-    });
+  //   const addressResolver = new Promise((resolve) => {
+  //     if (user.walletAddress == null && user.randomSeed == null) {
+  //       this.walletService.createAccount(seed).subscribe(async (response) => {
+  //         user.randomSeed = seed;
+  //         user.walletAddress = response.result;
+  //         await this.userService.updateUser(user);
+  //         resolve(response.result);
+  //       });
+  //     } else {
+  //       resolve(user.walletAddress);
+  //     }
+  //   });
 
-    return {
-      message: 'Sukses Set Address',
-      data: {
-        address: await addressResolver,
-      },
-    };
-  }
+  //   return {
+  //     message: 'Sukses Set Address',
+  //     data: {
+  //       address: await addressResolver,
+  //     },
+  //   };
+  // }
 
   @UseGuards(JwtAuthGuard)
   @Get('election/ready-to-deploy')

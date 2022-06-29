@@ -24,6 +24,7 @@ export class AppController {
     private authService: AuthService,
     private userService: UsersService,
     private walletService: WalletService,
+    private ethereumElectionService: EthereumElectionService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -71,6 +72,46 @@ export class AppController {
 
     return {
       data: result,
+    };
+  }
+
+  @Get('deploy-contract')
+  async deployContract() {
+    const result = await this.ethereumElectionService.deployNewContract();
+
+    return {
+      data: result,
+    };
+  }
+
+  @Get('add-candidate')
+  async addCandidate() {
+    const address = await this.ethereumElectionService.deployNewContract();
+    const result = await this.ethereumElectionService.addCandidate(address);
+
+    return {
+      data: result,
+    };
+  }
+
+  @Get('estimate-gas')
+  async estimateGas() {
+    const address = await this.ethereumElectionService.deployNewContract();
+    const result = await this.ethereumElectionService.estimate(address);
+
+    return {
+      data: result,
+    };
+  }
+
+  @Get('setup-election')
+  async abstain() {
+    const address = await this.ethereumElectionService.deployNewContract();
+    await this.ethereumElectionService.addCandidate(address);
+    await this.ethereumElectionService.start(address);
+
+    return {
+      data: address,
     };
   }
 }

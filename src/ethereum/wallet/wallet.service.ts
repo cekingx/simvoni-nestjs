@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
-import { Wallet, ethers, utils } from 'ethers';
+import { Wallet, ethers, utils, BigNumberish } from 'ethers';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import Web3 from 'web3';
@@ -23,14 +23,14 @@ export class WalletService {
     return result;
   }
 
-  async sendEtherFromFaucet(destination: string, amount: string) {
+  async sendEtherFromFaucet(destination: string, amount: BigNumberish) {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://127.0.0.1:8545/',
     );
     const faucet = new Wallet(process.env.FAUCET_PRIVATE_KEY);
     const result = await faucet.connect(provider).sendTransaction({
       to: destination,
-      value: utils.parseEther(amount),
+      value: amount,
     });
 
     return result;

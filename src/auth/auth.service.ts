@@ -21,7 +21,6 @@ export class AuthService {
         name: user.name,
         username: user.username,
         walletAddress: user.walletAddress,
-        randomSeed: user.randomSeed,
         role: user.userRole.role,
       };
       return result;
