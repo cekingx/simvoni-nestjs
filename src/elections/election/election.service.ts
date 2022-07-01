@@ -113,6 +113,21 @@ export class ElectionService {
     return candidates;
   }
 
+  async getWeightByElectionId(electionId: number): Promise<number[]> {
+    const weights = await this.weightRepository
+      .createQueryBuilder('weight')
+      .innerJoinAndSelect('weight.election', 'election')
+      .where('election.id = :id', { id: electionId })
+      .getMany();
+
+    const result = [];
+    weights.forEach((weight) => {
+      result.push(weight.weight);
+    });
+
+    return result;
+  }
+
   async getCandidatesSlugByElectionId(
     electionId: number,
   ): Promise<Candidate[]> {

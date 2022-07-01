@@ -77,7 +77,7 @@ export class AppController {
 
   @Get('deploy-contract')
   async deployContract() {
-    const result = await this.ethereumElectionService.deployNewContract();
+    const result = await this.ethereumElectionService.deployNewContract('Pemira HTMI', 'xxx', [1]);
 
     return {
       data: result,
@@ -86,8 +86,8 @@ export class AppController {
 
   @Get('add-candidate')
   async addCandidate() {
-    const address = await this.ethereumElectionService.deployNewContract();
-    const result = await this.ethereumElectionService.addCandidate(address);
+    const address = await this.ethereumElectionService.deployNewContract('Pemira HTMI', 'xxx',[1]);
+    const result = await this.ethereumElectionService.addCandidate(address, 'xxx', 'xxx');
 
     return {
       data: result,
@@ -96,7 +96,7 @@ export class AppController {
 
   @Get('estimate-gas')
   async estimateGas() {
-    const address = await this.ethereumElectionService.deployNewContract();
+    const address = await this.ethereumElectionService.deployNewContract('Pemira HTMI', 'xxx',[1]);
     const result = await this.ethereumElectionService.estimate(address);
 
     return {
@@ -106,8 +106,8 @@ export class AppController {
 
   @Get('setup-election')
   async abstain() {
-    const address = await this.ethereumElectionService.deployNewContract();
-    await this.ethereumElectionService.addCandidate(address);
+    const address = await this.ethereumElectionService.deployNewContract('Pemira HTMI', 'xxx',[1]);
+    await this.ethereumElectionService.addCandidate(address, 'xxx', 'xxx');
     await this.ethereumElectionService.start(address);
 
     return {

@@ -33,35 +33,39 @@ export class EthereumElectionService {
     return data;
   }
 
-  async deployNewContract() {
+  async deployNewContract(
+    name: string,
+    eaPrivateKey: string,
+    weight: Array<number>,
+  ) {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://127.0.0.1:8545/',
     );
-    const deployer = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const deployer = new Wallet(eaPrivateKey);
     const factory = new ContractFactory(
       electionAbi.abi,
       electionAbi.bytecode,
       deployer.connect(provider),
     );
 
-    const contract = await factory.deploy('Pemira HMTI', [1]);
+    const contract = await factory.deploy(name, weight);
     await contract.deployTransaction.wait();
 
     return contract.address;
   }
 
-  async addCandidate(address: string) {
+  async addCandidate(address: string, eaPrivateKey: string, name: string) {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://127.0.0.1:8545/',
     );
-    const signer = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const signer = new Wallet(eaPrivateKey);
     const contract = new Contract(
       address,
       electionAbi.abi,
       signer.connect(provider),
     );
 
-    const tx = await contract.addCandidate('dirga');
+    const tx = await contract.addCandidate(name);
     return tx.wait();
   }
 

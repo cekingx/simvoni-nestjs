@@ -163,60 +163,31 @@ export class SuperAdminController {
   @Post('deploy-election/:electionId')
   async deployElection(@Param('electionId') electionId: number) {
     const election = await this.electionService.getElectionById(electionId);
+    console.log(election);
     const candidatesSlug = await this.electionService.getCandidatesSlugByElectionId(
       electionId,
     );
-    const superAdmin = await this.userService.findOne('super-admin');
-    const ea = await this.userService.findElectionAuthorityById(
-      election.electionAuthority.id,
-    );
+    const weight = await this.electionService.getWeightByElectionId(electionId);
 
-    /**
-     * delete soon
-     */
-    // await this.walletService.sendEtherForDeploy(
-    //   superAdmin.walletAddress,
-    //   process.env.ETH_PASSWORD,
-    //   ea.walletAddress,
-    // );
-
-    const contractAddress = await this.ethereumElectionService.deployContract(
-      ea.walletAddress,
-      process.env.ETH_PASSWORD,
+    const contractAddress = await this.ethereumElectionService.deployNewContract(
+      election.name,
+      election.electionAuthority.privateKey,
+      weight,
     );
 
     election.contractAddress = contractAddress;
     await this.electionService.updateElectionAddress(election, contractAddress);
     await this.electionService.updateElectionStatus(election, 3);
 
-    const contract = await this.ethereumElectionService.connectToContract(
-      contractAddress,
-    );
-
     for (let index = 0; index < candidatesSlug.length; index++) {
       const candidate = candidatesSlug[index];
 
-      const contractMethods = this.walletService.getContractMethods(
+      const receipt = await this.ethereumElectionService.addCandidate(
         contractAddress,
-        'REGISTER_CANDIDATE',
+        election.electionAuthority.privateKey,
         candidate.nameSlug,
       );
 
-      /**
-       * delete soon
-       */
-      // await this.walletService.sendEtherForMethods(
-      //   contractMethods,
-      //   ea.walletAddress,
-      //   superAdmin.walletAddress,
-      //   process.env.ETH_PASSWORD,
-      // );
-      const receipt = await this.ethereumElectionService.registerCandidate(
-        contract,
-        candidate.nameSlug,
-        ea.walletAddress,
-        process.env.ETH_PASSWORD,
-      );
       this.logger.log('[Candidate] ' + receipt);
     }
 
