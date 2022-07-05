@@ -311,34 +311,11 @@ export class ElectionAuthorityController {
   @Post('start-election/:electionId')
   async startElection(@Param('electionId') electionId: number) {
     const election = await this.electionService.getElectionById(electionId);
-    const superAdmin = await this.userService.findOne('super-admin');
-    const ea = await this.userService.findElectionAuthorityById(
-      election.electionAuthority.id,
-    );
+    console.log(election);
 
-    const contractMethods = this.walletService.getContractMethods(
+    await this.ethereumElectionService.start(
       election.contractAddress,
-      'START_ELECTION',
-    );
-
-    /**
-     * delete soon
-     */
-    // await this.walletService.sendEtherForMethods(
-    //   contractMethods,
-    //   ea.walletAddress,
-    //   superAdmin.walletAddress,
-    //   process.env.ETH_PASSWORD,
-    // );
-
-    const contract = this.ethereumElectionService.connectToContract(
-      election.contractAddress,
-    );
-
-    const receipt = await this.ethereumElectionService.startElection(
-      contract,
-      ea.walletAddress,
-      process.env.ETH_PASSWORD,
+      election.electionAuthority.privateKey,
     );
 
     await this.electionService.updateElectionStatus(election, 4);
@@ -355,35 +332,11 @@ export class ElectionAuthorityController {
   @Post('end-election/:electionId')
   async endElection(@Param('electionId') electionId: number) {
     const election = await this.electionService.getElectionById(electionId);
-    const superAdmin = await this.userService.findOne('super-admin');
-    const ea = await this.userService.findElectionAuthorityById(
-      election.electionAuthority.id,
-    );
-    const contractMethods = this.walletService.getContractMethods(
+
+    await this.ethereumElectionService.end(
       election.contractAddress,
-      'END_ELECTION',
+      election.electionAuthority.privateKey,
     );
-
-    /**
-     * delete soon
-     */
-    // await this.walletService.sendEtherForMethods(
-    //   contractMethods,
-    //   ea.walletAddress,
-    //   superAdmin.walletAddress,
-    //   process.env.ETH_PASSWORD,
-    // );
-
-    const contract = this.ethereumElectionService.connectToContract(
-      election.contractAddress,
-    );
-
-    const receipt = await this.ethereumElectionService.endElection(
-      contract,
-      ea.walletAddress,
-      process.env.ETH_PASSWORD,
-    );
-
     await this.electionService.updateElectionStatus(election, 5);
 
     return {

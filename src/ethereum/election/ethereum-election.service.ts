@@ -86,11 +86,11 @@ export class EthereumElectionService {
     return result.mul(gasPrice).mul(2);
   }
 
-  async start(address: string) {
+  async start(address: string, eaPrivateKey: string) {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://127.0.0.1:8545/',
     );
-    const signer = new Wallet(process.env.FAUCET_PRIVATE_KEY);
+    const signer = new Wallet(eaPrivateKey);
     const contract = new Contract(
       address,
       electionAbi.abi,
@@ -98,6 +98,21 @@ export class EthereumElectionService {
     );
 
     const tx = await contract.startElection();
+    return tx.wait();
+  }
+
+  async end(address: string, eaPrivateKey: string) {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545/',
+    );
+    const signer = new Wallet(eaPrivateKey);
+    const contract = new Contract(
+      address,
+      electionAbi.abi,
+      signer.connect(provider),
+    );
+
+    const tx = await contract.endElection();
     return tx.wait();
   }
 

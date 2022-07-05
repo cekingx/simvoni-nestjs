@@ -108,7 +108,7 @@ export class AppController {
   async abstain() {
     const address = await this.ethereumElectionService.deployNewContract('Pemira HTMI', 'xxx',[1]);
     await this.ethereumElectionService.addCandidate(address, 'xxx', 'xxx');
-    await this.ethereumElectionService.start(address);
+    await this.ethereumElectionService.start(address, 'xxx');
 
     return {
       data: address,
