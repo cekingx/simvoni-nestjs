@@ -76,49 +76,40 @@ export class VoterController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('vote')
-  async voteOnElection(@Request() req, @Body() ballot: Ballot) {
+  @Post('vote/:id')
+  async voteOnElection(
+    @Request() req,
+    @Param('id') electionId: number,
+    @Body() ballot: Ballot,
+  ) {
     try {
       const username = req.user.username;
       const voter = await this.userService.findOne(username);
-      const superAdmin = await this.userService.findOne('super-admin');
       const voterParticipations: ElectionParticipant[] = await this.electionService.getUserParticipation(
         username,
       );
       const voterParticipation = voterParticipations.find(
-        (data: ElectionParticipant) => data.election.id == ballot.election_id,
+        (data: ElectionParticipant) => data.election.id == electionId,
       );
-      const election = await this.electionService.getElectionById(
-        ballot.election_id,
+      const election = await this.electionService.getElectionById(electionId);
+      const electionWeight = await this.electionService.getWeightByElectionId(
+        electionId,
       );
-      const candidate = await this.electionService.getCandidateById(
-        ballot.candidate_id,
+      const candidates = await this.electionService.getCandidatesByElectionId(
+        electionId,
       );
-      const contractMethods = this.walletService.getContractMethods(
+      const candidateIndex = candidates.findIndex(
+        (x) => x.id == ballot.candidate_id,
+      );
+      const weightType = electionWeight.findIndex(
+        (x) => x == voterParticipation.weight.weight,
+      );
+
+      await this.ethereumElectionService.vote(
         election.contractAddress,
-        'VOTE',
-        candidate.nameSlug,
-      );
-
-      /**
-       * delete soon
-       */
-      // await this.walletService.sendEtherForMethods(
-      //   contractMethods,
-      //   voter.walletAddress,
-      //   superAdmin.walletAddress,
-      //   process.env.ETH_PASSWORD,
-      // );
-
-      const contract = this.ethereumElectionService.connectToContract(
-        election.contractAddress,
-      );
-
-      const receipt = this.ethereumElectionService.vote(
-        contract,
-        candidate.nameSlug,
-        voter.walletAddress,
-        process.env.ETH_PASSWORD,
+        voter.privateKey,
+        weightType,
+        candidateIndex,
       );
 
       await this.electionService.updateParticipationStatus(

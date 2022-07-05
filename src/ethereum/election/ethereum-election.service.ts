@@ -69,6 +69,10 @@ export class EthereumElectionService {
     return tx.wait();
   }
 
+  /**
+   * TODO:
+   * estimate for any method
+   */
   async estimate(address: string): Promise<BigNumberish> {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://127.0.0.1:8545',
@@ -83,7 +87,7 @@ export class EthereumElectionService {
     const gasPrice = await provider.getGasPrice();
     console.log(gasPrice);
     const result = await contract.estimateGas.abstain();
-    return result.mul(gasPrice).mul(2);
+    return result.mul(gasPrice).mul(5);
   }
 
   async start(address: string, eaPrivateKey: string) {
@@ -127,6 +131,26 @@ export class EthereumElectionService {
     console.log(gas.toString());
     (await this.sendEtherFromFaucet(wallet.address, gas)).wait();
     const tx = await contract.connect(wallet.connect(provider)).abstain();
+    return tx.wait();
+  }
+
+  async vote(
+    address: string,
+    privateKey: string,
+    weightType: number,
+    candidateId: number,
+  ) {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545',
+    );
+    const wallet = new Wallet(privateKey);
+    const contract = new Contract(address, electionAbi.abi);
+    const gas = await this.estimate(address);
+    console.log(gas.toString());
+    (await this.sendEtherFromFaucet(wallet.address, gas)).wait();
+    const tx = await contract
+      .connect(wallet.connect(provider))
+      .vote(weightType, candidateId);
     return tx.wait();
   }
 
@@ -217,7 +241,10 @@ export class EthereumElectionService {
     }
   }
 
-  async vote(
+  /**
+   * @deprecated
+   */
+  async voteOld(
     contract: any,
     name_slug: string,
     sender: string,

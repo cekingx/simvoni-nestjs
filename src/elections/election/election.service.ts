@@ -105,8 +105,8 @@ export class ElectionService {
     const candidates = await this.candidateRepository
       .createQueryBuilder('candidate')
       .innerJoinAndSelect('candidate.election', 'election')
-      .innerJoinAndSelect('candidate.misi', 'misi')
-      .innerJoinAndSelect('candidate.pengalaman', 'pengalaman')
+      .leftJoinAndSelect('candidate.misi', 'misi')
+      .leftJoinAndSelect('candidate.pengalaman', 'pengalaman')
       .where('election.id = :id', { id: electionId })
       .getMany();
 
@@ -344,6 +344,7 @@ export class ElectionService {
       .innerJoinAndSelect('participation.participant', 'user')
       .innerJoinAndSelect('participation.election', 'election')
       .innerJoinAndSelect('participation.status', 'status')
+      .innerJoinAndSelect('participation.weight', 'weight')
       .where('user.username = :user', { user: username })
       .getMany();
 
