@@ -328,9 +328,6 @@ export class VoterController {
       electionId,
     );
     const endedCandidateDto: EndedCandidateDto[] = [];
-    const contract = this.ethereumElectionService.connectToContract(
-      election.contractAddress,
-    );
 
     for (let index = 0; index < candidates.length; index++) {
       const candidate = candidates[index];
@@ -338,8 +335,8 @@ export class VoterController {
       const misis: string[] = [];
       const pengalamans: string[] = [];
 
-      const voteCount: any = await this.ethereumElectionService.getVoteCount(
-        contract,
+      const voteCount = await this.ethereumElectionService.getCandidate(
+        election.contractAddress,
         index,
       );
 
@@ -355,7 +352,7 @@ export class VoterController {
         id: candidate.id,
         name: candidate.name,
         visi: candidate.visi,
-        vote_count: +voteCount._votes,
+        vote_count: voteCount[1].toNumber(),
         misi: misis,
         pengalaman: pengalamans,
       };

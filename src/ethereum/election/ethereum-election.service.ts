@@ -154,6 +154,16 @@ export class EthereumElectionService {
     return tx.wait();
   }
 
+  async getCandidate(address: string, id: number) {
+    const contract = new Contract(address, electionAbi.abi);
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545/',
+    );
+
+    const count = await contract.connect(provider).getCandidate(id);
+    return count;
+  }
+
   async sendEtherFromFaucet(destination: string, amount: BigNumberish) {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://127.0.0.1:8545/',
@@ -336,6 +346,9 @@ export class EthereumElectionService {
     return numCanidates;
   }
 
+  /**
+   * @deprecated
+   */
   async getVoteCount(contract: any, index: number) {
     const result = await contract.methods.get_candidate(index).call();
 
