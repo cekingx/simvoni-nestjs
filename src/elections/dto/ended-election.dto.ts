@@ -7,5 +7,8 @@ export class EndedCandidateDto extends CandidateDto {
 
 export class EndedElectionDto extends ElectionDto {
   winner: string;
+  votes: number;
+  abstains: number;
+  total: number;
   candidates: EndedCandidateDto[];
 }

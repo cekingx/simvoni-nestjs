@@ -164,6 +164,20 @@ export class EthereumElectionService {
     return count;
   }
 
+  async getAnalytic(address: string) {
+    const contract = new Contract(address, electionAbi.abi);
+    const provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545',
+    );
+
+    const votes = (await contract.connect(provider).voteCount()).toNumber();
+    const abstains = (
+      await contract.connect(provider).abstainCount()
+    ).toNumber();
+
+    return { votes, abstains, total: votes + abstains };
+  }
+
   async sendEtherFromFaucet(destination: string, amount: BigNumberish) {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://127.0.0.1:8545/',

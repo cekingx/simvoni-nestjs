@@ -363,6 +363,9 @@ export class VoterController {
     const winner = endedCandidateDto.reduce((prev, current) => {
       return prev.vote_count > current.vote_count ? prev : current;
     });
+    const analytic = await this.ethereumElectionService.getAnalytic(
+      election.contractAddress,
+    );
 
     const endedElectionDto: EndedElectionDto = {
       id: election.id,
@@ -374,6 +377,7 @@ export class VoterController {
       ea: election.electionAuthority.name,
       winner: winner.name,
       candidates: endedCandidateDto,
+      ...analytic,
     };
 
     return {
