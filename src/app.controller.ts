@@ -13,6 +13,7 @@ import { AppService } from './app.service';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/local-auth.guard';
+import { EthMethod } from './ethereum/election/eth-method.enum';
 import { EthereumElectionService } from './ethereum/election/ethereum-election.service';
 import { WalletService } from './ethereum/wallet/wallet.service';
 import { CreateUserDto } from './users/create-user.dto';
@@ -97,7 +98,7 @@ export class AppController {
   @Get('estimate-gas')
   async estimateGas() {
     const address = await this.ethereumElectionService.deployNewContract('Pemira HTMI', 'xxx',[1]);
-    const result = await this.ethereumElectionService.estimate(address);
+    const result = await this.ethereumElectionService.estimate(address, EthMethod.ABSTAIN);
 
     return {
       data: result,

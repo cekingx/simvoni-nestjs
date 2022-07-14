@@ -5,6 +5,7 @@ import { AccountService } from '../account/account.service';
 import * as contractFile from './BallotContract.json';
 import * as electionAbi from './Election.json';
 import {
+  BigNumber,
   BigNumberish,
   Contract,
   ContractFactory,
@@ -12,11 +13,13 @@ import {
   utils,
   Wallet,
 } from 'ethers';
+import { EthMethod } from './eth-method.enum';
 
 @Injectable()
 export class EthereumElectionService {
   private abi: any;
   private bytecode: any;
+  private provider: any;
 
   constructor(
     @Inject('web3') private web3: web3,
@@ -26,6 +29,9 @@ export class EthereumElectionService {
   ) {
     this.abi = contractFile.abi;
     this.bytecode = contractFile.bytecode;
+    this.provider = new ethers.providers.JsonRpcProvider(
+      'http://127.0.0.1:8545',
+    );
   }
 
   getAccounts() {
@@ -38,14 +44,11 @@ export class EthereumElectionService {
     eaPrivateKey: string,
     weight: Array<number>,
   ) {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545/',
-    );
     const deployer = new Wallet(eaPrivateKey);
     const factory = new ContractFactory(
       electionAbi.abi,
       electionAbi.bytecode,
-      deployer.connect(provider),
+      deployer.connect(this.provider),
     );
 
     const contract = await factory.deploy(name, weight);
@@ -55,50 +58,64 @@ export class EthereumElectionService {
   }
 
   async addCandidate(address: string, eaPrivateKey: string, name: string) {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545/',
-    );
     const signer = new Wallet(eaPrivateKey);
     const contract = new Contract(
       address,
       electionAbi.abi,
-      signer.connect(provider),
+      signer.connect(this.provider),
     );
 
     const tx = await contract.addCandidate(name);
     return tx.wait();
   }
 
-  /**
-   * TODO:
-   * estimate for any method
-   */
-  async estimate(address: string): Promise<BigNumberish> {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545',
-    );
+  async estimate(
+    address: string,
+    method: EthMethod,
+    extra?: Record<string, unknown>,
+  ): Promise<BigNumberish> {
     const signer = new Wallet(process.env.FAUCET_PRIVATE_KEY);
     const contract = new Contract(
       address,
       electionAbi.abi,
-      signer.connect(provider),
+      signer.connect(this.provider),
     );
-
-    const gasPrice = await provider.getGasPrice();
+    const gasPrice = await this.provider.getGasPrice();
     console.log(gasPrice);
-    const result = await contract.estimateGas.abstain();
-    return result.mul(gasPrice).mul(5);
+
+    switch (method) {
+      case EthMethod.ABSTAIN: {
+        const result = await contract.estimateGas.abstain();
+        return result.mul(gasPrice).mul(2);
+      }
+
+      case EthMethod.VOTE: {
+        const { weightType, candidateId } = extra;
+        const result = await contract.estimateGas.vote(weightType, candidateId);
+        return result.mul(gasPrice).mul(2);
+      }
+
+      case EthMethod.START: {
+        const result = await contract.estimateGas.startElection();
+        return result.mul(gasPrice).mul(2);
+      }
+
+      case EthMethod.END: {
+        const result = await contract.estimateGas.endElection();
+        return result.mul(gasPrice).mul(2);
+      }
+
+      default:
+        return BigNumber.from(0);
+    }
   }
 
   async start(address: string, eaPrivateKey: string) {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545/',
-    );
     const signer = new Wallet(eaPrivateKey);
     const contract = new Contract(
       address,
       electionAbi.abi,
-      signer.connect(provider),
+      signer.connect(this.provider),
     );
 
     const tx = await contract.startElection();
@@ -106,14 +123,11 @@ export class EthereumElectionService {
   }
 
   async end(address: string, eaPrivateKey: string) {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545/',
-    );
     const signer = new Wallet(eaPrivateKey);
     const contract = new Contract(
       address,
       electionAbi.abi,
-      signer.connect(provider),
+      signer.connect(this.provider),
     );
 
     const tx = await contract.endElection();
@@ -121,16 +135,13 @@ export class EthereumElectionService {
   }
 
   async abstain(address: string, privateKey: string) {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545/',
-    );
     const wallet = new Wallet(privateKey);
     const contract = new Contract(address, electionAbi.abi);
 
-    const gas = await this.estimate(address);
+    const gas = await this.estimate(address, EthMethod.ABSTAIN);
     console.log(gas.toString());
     (await this.sendEtherFromFaucet(wallet.address, gas)).wait();
-    const tx = await contract.connect(wallet.connect(provider)).abstain();
+    const tx = await contract.connect(wallet.connect(this.provider)).abstain();
     return tx.wait();
   }
 
@@ -140,50 +151,43 @@ export class EthereumElectionService {
     weightType: number,
     candidateId: number,
   ) {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545',
-    );
     const wallet = new Wallet(privateKey);
     const contract = new Contract(address, electionAbi.abi);
-    const gas = await this.estimate(address);
+    const gas = await this.estimate(address, EthMethod.VOTE, {
+      weightType,
+      candidateId,
+    });
     console.log(gas.toString());
     (await this.sendEtherFromFaucet(wallet.address, gas)).wait();
     const tx = await contract
-      .connect(wallet.connect(provider))
+      .connect(wallet.connect(this.provider))
       .vote(weightType, candidateId);
     return tx.wait();
   }
 
   async getCandidate(address: string, id: number) {
     const contract = new Contract(address, electionAbi.abi);
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545/',
-    );
 
-    const count = await contract.connect(provider).getCandidate(id);
+    const count = await contract.connect(this.provider).getCandidate(id);
     return count;
   }
 
   async getAnalytic(address: string) {
     const contract = new Contract(address, electionAbi.abi);
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545',
-    );
 
-    const votes = (await contract.connect(provider).voteCount()).toNumber();
+    const votes = (
+      await contract.connect(this.provider).voteCount()
+    ).toNumber();
     const abstains = (
-      await contract.connect(provider).abstainCount()
+      await contract.connect(this.provider).abstainCount()
     ).toNumber();
 
     return { votes, abstains, total: votes + abstains };
   }
 
   async sendEtherFromFaucet(destination: string, amount: BigNumberish) {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'http://127.0.0.1:8545/',
-    );
     const faucet = new Wallet(process.env.FAUCET_PRIVATE_KEY);
-    const result = await faucet.connect(provider).sendTransaction({
+    const result = await faucet.connect(this.provider).sendTransaction({
       to: destination,
       value: amount,
     });
