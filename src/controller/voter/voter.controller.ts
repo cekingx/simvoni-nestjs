@@ -259,6 +259,7 @@ export class VoterController {
   @Get('election-detail/:electionId')
   async getElectionDetail(@Request() req, @Param('electionId') electionId) {
     const username = req.user.username;
+    const user = await this.userService.findOne(username);
     const userParticipations: ElectionParticipant[] = await this.electionService.getUserParticipation(
       username,
     );
@@ -307,6 +308,8 @@ export class VoterController {
       ea: election.electionAuthority.name,
       participation_status: userParticipation.status.status,
       candidates: candidatesDto,
+      from: user.walletAddress,
+      to: election.contractAddress,
     };
 
     return {
