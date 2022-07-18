@@ -16,6 +16,7 @@ import { LocalAuthGuard } from './auth/local-auth.guard';
 import { EthMethod } from './ethereum/election/eth-method.enum';
 import { EthereumElectionService } from './ethereum/election/ethereum-election.service';
 import { WalletService } from './ethereum/wallet/wallet.service';
+import { UploadImageService } from './helper/upload-image.service';
 import { CreateUserDto } from './users/create-user.dto';
 import { UsersService } from './users/users.service';
 
@@ -26,6 +27,7 @@ export class AppController {
     private userService: UsersService,
     private walletService: WalletService,
     private ethereumElectionService: EthereumElectionService,
+    private uploadService: UploadImageService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -114,5 +116,12 @@ export class AppController {
     return {
       data: address,
     };
+  }
+
+  @Get('upload')
+  async upload() {
+    await this.uploadService.upload();
+
+    return true;
   }
 }

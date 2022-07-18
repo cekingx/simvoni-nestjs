@@ -13,6 +13,7 @@ import { VoterController } from './controller/voter/voter.controller';
 import { ConfigModule } from '@nestjs/config';
 import { CustomLogger } from './logger/logger.service';
 import { LoggerModule } from './logger/logger.module';
+import { UploadImageService } from './helper/upload-image.service';
 
 @Module({
   imports: [
@@ -41,6 +42,6 @@ import { LoggerModule } from './logger/logger.module';
     ElectionAuthorityController,
     VoterController,
   ],
-  providers: [AppService, ErrorResponseService],
+  providers: [AppService, ErrorResponseService, UploadImageService],
 })
 export class AppModule {}
