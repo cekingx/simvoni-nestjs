@@ -8,7 +8,11 @@ import {
   Body,
   Res,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AppService } from './app.service';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -16,6 +20,7 @@ import { LocalAuthGuard } from './auth/local-auth.guard';
 import { EthMethod } from './ethereum/election/eth-method.enum';
 import { EthereumElectionService } from './ethereum/election/ethereum-election.service';
 import { WalletService } from './ethereum/wallet/wallet.service';
+import { UploadImageService } from './helper/upload-image.service';
 import { CreateUserDto } from './users/create-user.dto';
 import { UsersService } from './users/users.service';
 
@@ -26,6 +31,7 @@ export class AppController {
     private userService: UsersService,
     private walletService: WalletService,
     private ethereumElectionService: EthereumElectionService,
+    private uploadService: UploadImageService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -114,5 +120,22 @@ export class AppController {
     return {
       data: address,
     };
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPost(@UploadedFile() file: Express.Multer.File) {
+    const result = await this.uploadService.upload(file);
+
+    return result;
+  }
+
+  @Post('form-data')
+  @UseInterceptors(FilesInterceptor('files'))
+  async formData(@UploadedFiles() files: Array<Express.Multer.File>, @Body() req: any) {
+    console.log(files);
+    console.log(Object.assign({}, req));
+
+    return true;
   }
 }

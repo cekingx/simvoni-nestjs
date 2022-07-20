@@ -16,6 +16,7 @@ import { UsersService } from '../../users/users.service';
 import { ElectionStatusEnum } from '../../helper/status';
 import { Weight } from '../entity/weight.entity';
 import { AddWeightDto } from '../dto/add-weight.dto';
+import { UploadImageService } from 'src/helper/upload-image.service';
 
 @Injectable()
 export class ElectionService {
@@ -50,6 +51,8 @@ export class ElectionService {
     private userService: UsersService,
 
     private connection: Connection,
+
+    private uploadService: UploadImageService,
   ) {}
 
   async getElectionByUsername(username: string): Promise<Election[]> {
@@ -209,7 +212,12 @@ export class ElectionService {
     return false;
   }
 
-  async addCandidate(addCandidateDto: AddCandidateDto, electionId: number) {
+  async addCandidate(
+    addCandidateDto: AddCandidateDto,
+    electionId: number,
+    image: Express.Multer.File,
+  ) {
+    const imageUrl = await this.uploadService.upload(image);
     let savedCandidate: Candidate;
     const election = await this.electionRepository
       .createQueryBuilder('election')
@@ -242,6 +250,7 @@ export class ElectionService {
       candidate.visi = addCandidateDto.visi;
       candidate.nameSlug = this.convertToSlug(addCandidateDto.name);
       candidate.election = election;
+      candidate.image = imageUrl;
 
       savedCandidate = await queryRunner.manager.save(candidate);
 

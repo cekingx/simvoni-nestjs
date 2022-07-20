@@ -38,3 +38,4 @@ request.http
 super-admin.http
 election-authority.http
 voter.http
+service-account.json
