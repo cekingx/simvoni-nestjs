@@ -5,7 +5,9 @@ import {
   Param,
   Post,
   Request,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { AddCandidateDto } from '../../elections/dto/add-candidate.dto';
@@ -28,6 +30,7 @@ import { UsersService } from '../../users/users.service';
 import { ElectionDetailDto } from '../../elections/dto/election-detail.dto';
 import { ElectionStatusEnum } from '../../helper/status';
 import { AddWeightDto } from 'src/elections/dto/add-weight.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {
@@ -143,8 +146,10 @@ export class ElectionAuthorityController {
 
   @UseGuards(JwtAuthGuard)
   @Post('add-candidate/:electionId')
+  @UseInterceptors(FilesInterceptor('files'))
   async addCandidateToElection(
-    @Body() addCandidateDto: AddCandidateDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Body() body: any,
     @Param('electionId') electionId: number,
     @Request() req,
   ) {
@@ -153,18 +158,22 @@ export class ElectionAuthorityController {
       electionId,
     );
 
-    if (isValidEa) {
-      const candidate = await this.electionService.addCandidate(
-        addCandidateDto,
-        electionId,
-      );
-      return {
-        message: 'Sukses Menambahkan Kandidat',
-        data: candidate,
-      };
-    }
+    const { data } = Object.assign({}, body);
+    const addCandidateDto: AddCandidateDto[] = JSON.parse(data);
+    console.log(addCandidateDto);
 
-    return false;
+    // if (isValidEa) {
+    //   const candidate = await this.electionService.addCandidate(
+    //     addCandidateDto,
+    //     electionId,
+    //   );
+    //   return {
+    //     message: 'Sukses Menambahkan Kandidat',
+    //     data: candidate,
+    //   };
+    // }
+
+    // return false;
   }
 
   @UseGuards(JwtAuthGuard)

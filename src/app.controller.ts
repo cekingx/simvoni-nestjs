@@ -10,8 +10,9 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AppService } from './app.service';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -121,18 +122,20 @@ export class AppController {
     };
   }
 
-  // @Get('upload')
-  // async upload() {
-  //   await this.uploadService.upload();
-
-  //   return true;
-  // }
-
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadPost(@UploadedFile() file: Express.Multer.File) {
     const result = await this.uploadService.upload(file);
 
     return result;
+  }
+
+  @Post('form-data')
+  @UseInterceptors(FilesInterceptor('files'))
+  async formData(@UploadedFiles() files: Array<Express.Multer.File>, @Body() req: any) {
+    console.log(files);
+    console.log(Object.assign({}, req));
+
+    return true;
   }
 }
