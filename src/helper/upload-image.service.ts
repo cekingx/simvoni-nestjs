@@ -23,6 +23,6 @@ export class UploadImageService {
     await bucketFile.save(file.buffer);
     await bucketFile.makePublic();
 
-    return bucketFile.name;
+    return `https://storage.googleapis.com/simvoni-bucket/${bucketFile.name}`;
   }
 }

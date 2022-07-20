@@ -23,6 +23,9 @@ export class Candidate {
   @Column()
   visi: string;
 
+  @Column()
+  image: string;
+
   @ManyToOne(() => Election, (election) => election.name)
   election: Election;
 

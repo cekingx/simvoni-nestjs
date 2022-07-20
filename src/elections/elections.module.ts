@@ -13,6 +13,7 @@ import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/user-role.entity';
 import { UpgradeRole } from '../users/upgrade-role.entity';
 import { Weight } from './entity/weight.entity';
+import { UploadImageService } from '../helper/upload-image.service';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { Weight } from './entity/weight.entity';
       Weight,
     ]),
   ],
-  providers: [ElectionService, UsersService],
+  providers: [ElectionService, UsersService, UploadImageService],
   exports: [ElectionService],
 })
 export class ElectionsModule {}
