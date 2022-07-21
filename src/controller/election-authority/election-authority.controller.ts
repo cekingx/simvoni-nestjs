@@ -95,6 +95,7 @@ export class ElectionAuthorityController {
         id: candidate.id,
         name: candidate.name,
         visi: candidate.visi,
+        image: candidate.image,
         misi: misis,
         pengalaman: pengalamans,
       };
@@ -227,6 +228,7 @@ export class ElectionAuthorityController {
         id: candidate.id,
         name: candidate.name,
         visi: candidate.visi,
+        image: candidate.image,
         misi: misis,
         pengalaman: pengalamans,
       };

@@ -287,6 +287,7 @@ export class VoterController {
         id: candidate.id,
         name: candidate.name,
         visi: candidate.visi,
+        image: candidate.image,
         misi: misis,
         pengalaman: pengalamans,
       };
@@ -355,6 +356,7 @@ export class VoterController {
         id: candidate.id,
         name: candidate.name,
         visi: candidate.visi,
+        image: candidate.image,
         vote_count: voteCount[1].toNumber(),
         misi: misis,
         pengalaman: pengalamans,
