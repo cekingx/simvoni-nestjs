@@ -32,7 +32,10 @@ import { ElectionDetailDto } from '../../elections/dto/election-detail.dto';
 import { ElectionStatusEnum } from '../../helper/status';
 import { AddWeightDto } from 'src/elections/dto/add-weight.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ElectionWeightDto } from 'src/elections/dto/election-weight.dto';
+import {
+  ElectionWeightDto,
+  WeightDto,
+} from 'src/elections/dto/election-weight.dto';
 
 @Controller('election-authority')
 export class ElectionAuthorityController {
@@ -323,13 +326,20 @@ export class ElectionAuthorityController {
   @UseGuards(JwtAuthGuard)
   @Get('weight/:electionId')
   async getElectionWeightByElectionId(@Param('electionId') electionId: number) {
-    const weights = await this.electionService.getWeightByElectionId(
+    const election = await this.electionService.getElectionById(electionId);
+    const weightsDto: WeightDto[] = await this.electionService.getWeightByElectionId(
       electionId,
     );
 
+    const electionWeightDto: ElectionWeightDto = {
+      electionId: election.id,
+      electionName: election.name,
+      weight: weightsDto,
+    };
+
     return {
       message: 'Sukses',
-      data: weights,
+      data: electionWeightDto,
     };
   }
 

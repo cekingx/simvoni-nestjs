@@ -17,7 +17,7 @@ import { ElectionStatusEnum } from '../../helper/status';
 import { Weight } from '../entity/weight.entity';
 import { AddWeightDto } from '../dto/add-weight.dto';
 import { UploadImageService } from 'src/helper/upload-image.service';
-import { ElectionWeightDto } from '../dto/election-weight.dto';
+import { WeightDto } from '../dto/election-weight.dto';
 
 @Injectable()
 export class ElectionService {
@@ -117,9 +117,7 @@ export class ElectionService {
     return candidates;
   }
 
-  async getWeightByElectionId(
-    electionId: number,
-  ): Promise<ElectionWeightDto[]> {
+  async getWeightByElectionId(electionId: number): Promise<WeightDto[]> {
     const weights = await this.weightRepository
       .createQueryBuilder('weight')
       .innerJoinAndSelect('weight.election', 'election')
