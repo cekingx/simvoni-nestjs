@@ -167,7 +167,7 @@ export class SuperAdminController {
     const candidatesSlug = await this.electionService.getCandidatesSlugByElectionId(
       electionId,
     );
-    const weight = await this.electionService.getWeightByElectionId(electionId);
+    const weight = await this.electionService.getWeightArray(electionId);
 
     const contractAddress = await this.ethereumElectionService.deployNewContract(
       election.name,

@@ -92,7 +92,7 @@ export class VoterController {
         (data: ElectionParticipant) => data.election.id == electionId,
       );
       const election = await this.electionService.getElectionById(electionId);
-      const electionWeight = await this.electionService.getWeightByElectionId(
+      const electionWeight = await this.electionService.getWeightArray(
         electionId,
       );
       const candidates = await this.electionService.getCandidatesByElectionId(
