@@ -127,6 +127,7 @@ export class ElectionService {
     const result = [];
     weights.forEach((weight) => {
       result.push({
+        id: weight.id,
         name: weight.name,
         weight: weight.weight,
       });
@@ -379,13 +380,21 @@ export class ElectionService {
     return participation;
   }
 
-  async acceptParticipation(electionParticipant: ElectionParticipant) {
+  async acceptParticipation(
+    electionParticipant: ElectionParticipant,
+    weightId: number,
+  ) {
     const participationStatus = await this.participationStatusRepository
       .createQueryBuilder('participation_status')
       .where('participation_status.id = :id', { id: 2 })
       .getOne();
+    const weight = await this.weightRepository
+      .createQueryBuilder('weight')
+      .where('weight.id = :id', { id: weightId })
+      .getOne();
 
     electionParticipant.status = participationStatus;
+    electionParticipant.weight = weight;
     return this.electionParticipantRepository.save(electionParticipant);
   }
 

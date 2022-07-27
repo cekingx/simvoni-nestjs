@@ -297,11 +297,17 @@ export class ElectionAuthorityController {
 
   @UseGuards(JwtAuthGuard)
   @Post('election-participant/accept/:participationId')
-  async acceptParticipation(@Param('participationId') participationId: number) {
+  async acceptParticipation(
+    @Param('participationId') participationId: number,
+    @Body() body: any,
+  ) {
     const electionParticipation = await this.electionService.getElectionParticipationById(
       participationId,
     );
-    await this.electionService.acceptParticipation(electionParticipation);
+    await this.electionService.acceptParticipation(
+      electionParticipation,
+      body.weightId,
+    );
 
     return {
       message: 'Success',

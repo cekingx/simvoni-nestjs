@@ -1,4 +1,5 @@
 export class WeightDto {
+  id: number;
   name: string;
   weight: number;
 }
